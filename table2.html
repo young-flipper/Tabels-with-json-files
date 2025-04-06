@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Устанавливаем масштаб страницы и адаптацию под ширину экрана устройства -->
+  <title>Таблица с фильтрацией</title>
+  <link rel="stylesheet" href="styles.css"> <!-- Подключаем файл стилей -->
+</head>
+<body>
+  <h1>Журнал производственных операций</h1> <!-- Заголовок страницы -->
+  <div class="filter-container">
+    <!-- Поле для глобального поиска по всем полям таблицы -->
+    <input type="text" id="globalSearch" placeholder="Поиск по всем полям...">
+  </div>
+  <table id="taskTable"> <!-- Таблица с задачами -->
+    <thead>
+      <tr>
+        <th>
+          Номер задачи <!-- Заголовок столбца "Номер задачи" -->
+          <input type="text" class="column-filter" data-column="numberTask" placeholder="Фильтр по номеру"> <!-- Фильтр для столбца "Номер задачи" -->
+        </th>
+        <th>
+          Имя сотрудника <!-- Заголовок столбца "Имя сотрудника" -->
+          <input type="text" class="column-filter" data-column="workerName" placeholder="Фильтр по имени"> <!-- Фильтр для столбца "Имя сотрудника" -->
+        </th>
+        <th>
+          Дата выдачи <!-- Заголовок столбца "Дата выдачи" -->
+          <input type="text" class="column-filter" data-column="dateIssue" placeholder="Фильтр по дате выдачи"> <!-- Фильтр для столбца "Дата выдачи" -->
+        </th>
+        <th>
+          Дата принятия <!-- Заголовок столбца "Дата принятия" -->
+          <input type="text" class="column-filter" data-column="dateAccept" placeholder="Фильтр по дате принятия"> <!-- Фильтр для столбца "Дата принятия" -->
+        </th>
+        <th>
+          Номер СП <!-- Заголовок столбца "Номер СП" -->
+          <input type="text" class="column-filter" data-column="numberSP" placeholder="Фильтр по номеру СП"> <!-- Фильтр для столбца "Номер СП" -->
+        </th>
+        <th>
+          Обозначение изделия <!-- Заголовок столбца "Обозначение изделия" -->
+          <input type="text" class="column-filter" data-column="designSP" placeholder="Фильтр по обозначению"> <!-- Фильтр для столбца "Обозначение изделия" -->
+        </th>
+        <th>
+          Наименование изделия <!-- Заголовок столбца "Наименование изделия" -->
+          <input type="text" class="column-filter" data-column="nameSP" placeholder="Фильтр по наименованию"> <!-- Фильтр для столбца "Наименование изделия" -->
+        </th>
+        <th>
+          Тип/характеристика <!-- Заголовок столбца "Тип/характеристика" -->
+          <input type="text" class="column-filter" data-column="typeSizeSP" placeholder="Фильтр по типу"> <!-- Фильтр для столбца "Тип/характеристика" -->
+        </th>
+        <th>
+          Номер операции <!-- Заголовок столбца "Номер операции" -->
+          <input type="text" class="column-filter" data-column="numberOperation" placeholder="Фильтр по номеру операции"> <!-- Фильтр для столбца "Номер операции" -->
+        </th>
+        <th>
+          Наименование операции <!-- Заголовок столбца "Наименование операции" -->
+          <input type="text" class="column-filter" data-column="nameOperation" placeholder="Фильтр по операции"> <!-- Фильтр для столбца "Наименование операции" -->
+        </th>
+        <th>
+          Кол-во выдано <!-- Заголовок столбца "Кол-во выдано" -->
+          <input type="text" class="column-filter" data-column="countIssued" placeholder="Фильтр по количеству"> <!-- Фильтр для столбца "Кол-во выдано" -->
+        </th>
+        <th>
+          Кол-во принято <!-- Заголовок столбца "Кол-во принято" -->
+          <input type="text" class="column-filter" data-column="countAccepted" placeholder="Фильтр по количеству"> <!-- Фильтр для столбца "Кол-во принято" -->
+        </th>
+        <th>
+          Процент выполнения <!-- Заголовок столбца "Процент выполнения" -->
+          <input type="text" class="column-filter" data-column="percentage" placeholder="Фильтр по проценту"> <!-- Фильтр для столбца "Процент выполнения" -->
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Данные будут добавлены динамически через JavaScript -->
+    </tbody>
+  </table>
+
+  <script src="script2.js"></script> <!-- Подключаем файл скриптов -->
+</body>
+</html>
