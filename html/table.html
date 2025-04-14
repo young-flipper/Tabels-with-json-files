@@ -1,53 +1,58 @@
-<!DOCTYPE html> <!-- Указывает, что это документ HTML5 -->
-<html lang="en"> <!-- Открывает элемент <html> и устанавливает язык документа на английский -->
+<!DOCTYPE html> <!-- Указывает, что это HTML5 документ -->
+<html lang="en"> <!-- Начало документа HTML с указанием языка (английский) -->
 <head>
   <meta charset="UTF-8"> <!-- Устанавливает кодировку документа на UTF-8 -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Устанавливаем масштаб страницы и адаптацию под ширину экрана устройства -->
-  <title>listTask</title> <!-- Заголовок страницы, отображаемый на вкладке браузера -->
-  <link rel="stylesheet" href="../css/styles.css"> <!-- Подключает внешний файл стилей CSS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Настройки для адаптивного дизайна -->
+  <title>Список заданий</title> <!-- Заголовок страницы, отображаемый в вкладке браузера -->
+  <link rel="stylesheet" href="../css/styles.css"> <!-- Подключение внешнего CSS-файла для стилизации страницы -->
 </head>
 <body>
-  <h1>Список заданий</h1> <!-- Заголовок страницы -->
+  <h1 class="task-header custom-header">Список заданий</h1> <!-- Заголовок страницы с классами для стилизации -->
 
-  <div class="filter-container"> <!-- Контейнер для фильтров поиска -->
-    <input type="text" id="globalSearch" placeholder="Поиск по всем полям..."> <!-- Поле для глобального поиска по всем полям таблицы -->
+  <!-- Глобальный поиск -->
+  <div class="filter-container"> <!-- Контейнер для поля глобального поиска -->
+    <input type="text" id="globalSearch" placeholder="Поиск по всем полям..."> <!-- Поле ввода для глобального поиска -->
   </div>
 
-  <!-- Таблица -->
-  <table id="taskTable"> <!-- Создает таблицу с идентификатором "taskTable" -->
-    <thead> <!-- Заголовок таблицы -->
-      <tr> <!-- Строка для заголовков столбцов таблицы -->
-        <th> <!-- Заголовок столбца "Номер задания" -->
+  <!-- Таблица с заданиями -->
+  <table id="taskTable"> <!-- Таблица с идентификатором taskTable для динамического заполнения -->
+    <thead>
+      <tr> <!-- Заголовок таблицы -->
+        <th>
           Номер задания
-          <input type="text" class="column-filter" data-column="numberTask" placeholder="Фильтр по номеру задания"> <!-- Фильтр для столбца "Номер задания" -->
+          <input type="text" class="column-filter" data-column="numberTask" placeholder="Фильтр по номеру задания"> <!-- Поле ввода для фильтрации по номеру задания -->
         </th>
-        <th> <!-- Заголовок столбца "Цех" -->
+        <th>
           Цех
-          <input type="text" class="column-filter" data-column="departTask" placeholder="Фильтр по цеху"> <!-- Фильтр для столбца "Цех" -->
+          <input type="text" class="column-filter" data-column="departTask" placeholder="Фильтр по цеху"> <!-- Поле ввода для фильтрации по цеху -->
         </th>
-        <th> <!-- Заголовок столбца "Мастер" -->
+        <th>
           Мастер
-          <input type="text" class="column-filter" data-column="masterName" placeholder="Фильтр по мастеру"> <!-- Фильтр для столбца "Мастер" -->
+          <input type="text" class="column-filter" data-column="masterName" placeholder="Фильтр по мастеру"> <!-- Поле ввода для фильтрации по мастеру -->
         </th>
-        <th> <!-- Заголовок столбца "Работник" -->
+        <th>
           Работник
-          <input type="text" class="column-filter" data-column="workerName" placeholder="Фильтр по работнику"> <!-- Фильтр для столбца "Работник" -->
+          <input type="text" class="column-filter" data-column="workerName" placeholder="Фильтр по работнику"> <!-- Поле ввода для фильтрации по работнику -->
         </th>
-        <th> <!-- Заголовок столбца "Дата выдачи" -->
+        <th>
           Дата выдачи
-          <input type="text" class="column-filter" data-column="dateIssue" placeholder="Фильтр по дате выдачи"> <!-- Фильтр для столбца "Дата выдачи" -->
+          <input type="text" class="column-filter" data-column="dateIssue" placeholder="Фильтр по дате выдачи"> <!-- Поле ввода для фильтрации по дате выдачи -->
         </th>
-        <th> <!-- Заголовок столбца "Дата принятия" -->
+        <th>
           Дата принятия
-          <input type="text" class="column-filter" data-column="dateAccept" placeholder="Фильтр по дате принятия"> <!-- Фильтр для столбца "Дата принятия" -->
+          <input type="text" class="column-filter" data-column="dateAccept" placeholder="Фильтр по дате принятия"> <!-- Поле ввода для фильтрации по дате принятия -->
         </th>
       </tr>
     </thead>
-    <tbody> <!-- Тело таблицы, где будут динамически добавлены данные через JavaScript -->
+    <tbody>
+      <!-- Данные будут добавлены динамически --> <!-- Здесь будут отображаться строки таблицы, добавляемые через JavaScript -->
     </tbody>
   </table>
 
-  <div id="pagination"></div> <!-- Контейнер для пагинации -->
-  <script src="../js/script1.js"></script> <!-- Подключаем файл скриптов для динамического управления таблицей -->
+  <!-- Контейнер для пагинации -->
+  <div id="pagination"></div> <!-- Элемент для отображения элементов пагинации -->
+
+  <!-- Подключение скрипта -->
+  <script src="../js/script.js"></script> <!-- Подключение внешнего JavaScript-файла для функциональности страницы -->
 </body>
 </html>
