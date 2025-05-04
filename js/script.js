@@ -1,10 +1,10 @@
 // Загружаем данные из JSON-файла
-fetch('listTask.json') // Отправляем запрос на загрузку файла listTask.json
+fetch('/data/listTask.json') // Абсолютный путь к файлу listTask.json
   .then(response => {
     if (!response.ok) { // Проверяем, успешен ли ответ
       // Если файл не найден, перенаправляем на страницу ошибки
       if (response.status === 404) { // Если статус ответа 404 (файл не найден)
-        window.location.href = "../html/error.html"; // Перенаправляем пользователя на страницу ошибки
+        window.location.href = "/error"; // Перенаправляем пользователя на страницу ошибки
       }
       throw new Error(`HTTP error! status: ${response.status}`); // Выбрасываем ошибку для других статусов
     }
@@ -20,34 +20,43 @@ fetch('listTask.json') // Отправляем запрос на загрузк�
 
 // Функция для отображения данных в таблице
 function renderTable(data) {
-  const tableBody = document.querySelector("#taskTable tbody"); // Находим тело таблицы по id
-  if (!tableBody) { // Если таблица не найдена
-    console.error('Таблица с id="taskTable" не найдена в HTML. Проверьте разметку.'); // Выводим ошибку
-    return; // Прекращаем выполнение функции
+  const tableBody = document.querySelector("#taskTable tbody");
+  if (!tableBody) {
+    console.error('Таблица с id="taskTable" не найдена в HTML. Проверьте разметку.');
+    return;
   }
-  tableBody.innerHTML = ""; // Очищаем содержимое таблицы перед добавлением новых данных
+  tableBody.innerHTML = "";
 
-  data.forEach(task => { // Перебираем массив данных
-    const row = document.createElement("tr"); // Создаем строку таблицы
+  data.forEach(task => {
+    const row = document.createElement("tr");
     row.innerHTML = `
-      <td class="number">${task.numberTask || ""}</td> <!-- Номер задания -->
-      <td class="number">${task.departTask || ""}</td> <!-- Отдел -->
-      <td>${task.masterName || ""}</td> <!-- Имя мастера -->
-      <td>${task.workerName || ""}</td> <!-- Имя работника -->
-      <td class="number">${task.dateIssue ? new Date(task.dateIssue).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : ""}</td> <!-- Дата выдачи -->
-      <td class="number">${task.dateAccept ? new Date(task.dateAccept).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : ""}</td> <!-- Дата принятия -->
+      <td class="number">${task.numberTask || ""}</td>
+      <td class="number">${task.departTask || ""}</td>
+      <td>${task.masterName || ""}</td>
+      <td>
+        ${formatWorkerName(task.workerName || "")}
+      </td>
+      <td class="number">${task.dateIssue ? new Date(task.dateIssue).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : ""}</td>
+      <td class="number">${task.dateAccept ? new Date(task.dateAccept).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : ""}</td>
     `;
 
-    // Добавляем обработчик клика на строку
     row.addEventListener("click", () => {
-      // Переход на table2.html с передачей номера задания через параметры URL
-      window.location.href = `table2.html?numberTask=${task.numberTask}`;
+      window.location.href = `/table2?numberTask=${task.numberTask}`;
     });
 
-    tableBody.appendChild(row); // Добавляем строку в таблицу
+    tableBody.appendChild(row);
   });
 
-  console.log('Таблица успешно отрендерена.'); // Логируем успешное завершение рендера
+  console.log('Таблица успешно отрендерена.');
+}
+
+// Функция для форматирования имени работника
+function formatWorkerName(workerName) {
+  const parts = workerName.split(" "); // Разделяем строку на части (Фамилия, Имя, Отчество)
+  if (parts.length === 3) {
+    return `${parts[0]} ${parts[1]}<br>${parts[2]}`; // Фамилия и Имя на одной строке, Отчество на следующей
+  }
+  return workerName; // Если формат не соответствует, возвращаем как есть
 }
 
 // Функция для настройки фильтров
