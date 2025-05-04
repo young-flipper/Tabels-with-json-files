@@ -54,6 +54,8 @@ table {
 th, td {
   border: 1px solid #ddd; /* Добавляем светло-серую границу вокруг каждой ячейки таблицы. */
   padding: 10px; /* Добавляем внутренние отступы, чтобы текст не прилипал к краям ячеек. */
+  text-align: center; /* Центрируем текст по горизонтали. */
+  vertical-align: middle; /* Центрируем текст по вертикали. */
 }
 
 /* Стили для заголовков таблицы */
@@ -103,28 +105,41 @@ th.number, td.number {
   margin: 0 0 20px 0; /* Убираем верхний отступ и оставляем только нижний. */
 }
 
-/* Стили для кнопки возврата к списку */
+/* Стили для кнопок */
+#buttonContainer {
+  display: flex; /* Располагаем кнопки в строку */
+  justify-content: flex-start; /* Центрируем кнопки */
+  gap: 10px; /* Добавляем расстояние между кнопками */
+  margin-top: 20px; /* Отступ сверху */
+}
+
+#editValuesButton,
+#saveChangesButton,
 #backToList {
-  display: inline-block; /* Делаем кнопку блочной для правильного отображения. */
-  padding: 10px 20px; /* Добавляем внутренние отступы для кнопки. */
-  font-size: 16px; /* Устанавливаем размер шрифта для текста кнопки. */
-  font-weight: bold; /* Устанавливаем жирный шрифт для текста кнопки. */
-  color: #fff; /* Устанавливаем белый цвет текста. */
-  background: linear-gradient(90deg, #007bff, #0056b3); /* Устанавливаем градиентный фон для кнопки. */
-  border: none; /* Убираем границу вокруг кнопки. */
-  border-radius: 5px; /* Скругляем углы кнопки. */
-  cursor: pointer; /* Устанавливаем указатель мыши в виде руки при наведении. */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Добавляем легкую тень вокруг кнопки. */
-  transition: all 0.3s ease; /* Добавляем плавный переход для всех изменений стиля. */
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
+#editValuesButton:hover,
+#saveChangesButton:hover,
 #backToList:hover {
-  background: linear-gradient(90deg, #0056b3, #003f7f); /* Меняем градиент фона при наведении. */
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Увеличиваем тень при наведении. */
+  background: linear-gradient(90deg, #0056b3, #003f7f);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
 }
 
+#editValuesButton:active,
+#saveChangesButton:active,
 #backToList:active {
-  transform: scale(0.98); /* Уменьшаем размер кнопки при нажатии для эффекта нажатия. */
+  transform: scale(0.98);
 }
 
 /* Стили для пагинации */
