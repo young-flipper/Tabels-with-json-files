@@ -1,58 +1,54 @@
-<!DOCTYPE html> <!-- Указывает, что это HTML5 документ -->
-<html lang="en"> <!-- Начало документа HTML с указанием языка (английский) -->
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8"> <!-- Устанавливает кодировку документа на UTF-8 -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Настройки для адаптивного дизайна -->
-  <title>Список заданий</title> <!-- Заголовок страницы, отображаемый в вкладке браузера -->
-  <link rel="stylesheet" href="../css/styles.css"> <!-- Подключение внешнего CSS-файла для стилизации страницы -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Список заданий</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-  <h1 class="task-header custom-header">Список заданий</h1> <!-- Заголовок страницы с классами для стилизации -->
+  <h1 class="task-header custom-header">Список заданий</h1>
 
-  <!-- Глобальный поиск -->
-  <div class="filter-container"> <!-- Контейнер для поля глобального поиска -->
-    <input type="text" id="globalSearch" placeholder="Поиск по всем полям..."> <!-- Поле ввода для глобального поиска -->
+  <div class="filter-container">
+    <input type="text" id="globalSearch" placeholder="Поиск по всем полям...">
   </div>
 
-  <!-- Таблица с заданиями -->
-  <table id="taskTable"> <!-- Таблица с идентификатором taskTable для динамического заполнения -->
+  <table id="taskTable">
     <thead>
-      <tr> <!-- Заголовок таблицы -->
+      <tr>
         <th>
           Номер задания
-          <input type="text" class="column-filter" data-column="numberTask" placeholder="Фильтр по номеру задания"> <!-- Поле ввода для фильтрации по номеру задания -->
+          <input type="text" class="column-filter" data-column="numberTask" placeholder="Фильтр по номеру задания">
         </th>
         <th>
           Цех
-          <input type="text" class="column-filter" data-column="departTask" placeholder="Фильтр по цеху"> <!-- Поле ввода для фильтрации по цеху -->
+          <input type="text" class="column-filter" data-column="departTask" placeholder="Фильтр по цеху">
         </th>
         <th>
           Мастер
-          <input type="text" class="column-filter" data-column="masterName" placeholder="Фильтр по мастеру"> <!-- Поле ввода для фильтрации по мастеру -->
+          <input type="text" class="column-filter" data-column="masterName" placeholder="Фильтр по мастеру">
         </th>
         <th>
           Работник
-          <input type="text" class="column-filter" data-column="workerName" placeholder="Фильтр по работнику"> <!-- Поле ввода для фильтрации по работнику -->
+          <input type="text" class="column-filter" data-column="workerName" placeholder="Фильтр по работнику">
         </th>
         <th>
           Дата выдачи
-          <input type="text" class="column-filter" data-column="dateIssue" placeholder="Фильтр по дате выдачи"> <!-- Поле ввода для фильтрации по дате выдачи -->
+          <input type="text" class="column-filter" data-column="dateIssue" placeholder="Фильтр по дате выдачи">
         </th>
         <th>
           Дата принятия
-          <input type="text" class="column-filter" data-column="dateAccept" placeholder="Фильтр по дате принятия"> <!-- Поле ввода для фильтрации по дате принятия -->
+          <input type="text" class="column-filter" data-column="dateAccept" placeholder="Фильтр по дате принятия">
         </th>
       </tr>
     </thead>
     <tbody>
-      <!-- Данные будут добавлены динамически --> <!-- Здесь будут отображаться строки таблицы, добавляемые через JavaScript -->
+      <!-- Данные будут добавлены динамически -->
     </tbody>
   </table>
 
-  <!-- Контейнер для пагинации -->
-  <div id="pagination"></div> <!-- Элемент для отображения элементов пагинации -->
+  <div id="pagination"></div>
 
-  <!-- Подключение скрипта -->
-  <script src="../js/script.js"></script> <!-- Подключение внешнего JavaScript-файла для функциональности страницы -->
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
