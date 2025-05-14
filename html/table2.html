@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Детали задания</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <h1 class="task-header">Задание</h1>
+
+  <div id="header">
+    <p><strong>Номер задания:</strong> <span id="headerNumberTask"></span></p>
+    <p><strong>Работник:</strong> <span id="headerWorker"></span></p>
+    <p><strong>Дата выдачи:</strong> <span id="headerDateIssue" contenteditable="false"></span></p>
+    <p><strong>Дата принятия:</strong> <span id="headerDateAccept" contenteditable="false"></span></p>
+  </div>
+
+  <div id="buttonContainer">
+    <button id="backToList">Вернуться к списку</button>
+    <button id="editValuesButton">Изменить данные</button>
+  </div>
+
+  <table id="taskTable">
+    <thead>
+      <tr>
+        <th>Номер СП</th>
+        <th>Наименование</th>
+        <th>Типоразмер</th>
+        <th>Номер операции</th>
+        <th>Наименование операции</th>
+        <th>Кол-во выдано</th>
+        <th>Кол-во принято</th>
+        <th>Процент выполнения</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Данные будут добавлены динамически -->
+    </tbody>
+  </table>
+
+  <script src="../js/script2.js"></script>
+</body>
+</html>
