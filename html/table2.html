@@ -10,10 +10,24 @@
   <h1 class="task-header">Задание</h1>
 
   <div id="header">
-    <p><strong>Номер задания:</strong> <span id="headerNumberTask"></span></p>
-    <p><strong>Работник:</strong> <span id="headerWorker"></span></p>
-    <p><strong>Дата выдачи:</strong> <span id="headerDateIssue" contenteditable="false"></span></p>
-    <p><strong>Дата принятия:</strong> <span id="headerDateAccept" contenteditable="false"></span></p>
+    <div class="header-row">
+      <p><strong>Номер задания:</strong> <span id="headerNumberTask"></span></p>
+    </div>
+    <div class="header-row">
+      <p><strong>Работник:</strong> <span id="headerWorker"></span></p>
+    </div>
+    <div class="header-row">
+      <div class="date-container">
+        <p class="date-text"><strong>Дата выдачи:</strong> <span id="headerDateIssue"></span></p>
+        <button id="issueTaskBtn" class="inverted-btn date-btn">Выдать задание</button>
+      </div>
+    </div>
+    <div class="header-row">
+      <div class="date-container">
+        <p class="date-text"><strong>Дата принятия:</strong> <span id="headerDateAccept"></span></p>
+        <button id="acceptTaskBtn" class="inverted-btn date-btn">Принять задание</button>
+      </div>
+    </div>
   </div>
 
   <div id="buttonContainer">
