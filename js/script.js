@@ -1,195 +1,214 @@
 // Загружаем данные из JSON-файла
-fetch('listTask.json') // Отправляем запрос на загрузку файла listTask.json
+let globalData = [];
+let filteredData = [];
+let initialPage = 1;
+
+fetch('listTask.json')
   .then(response => {
-    if (!response.ok) { // Проверяем, успешен ли ответ
-      // Если файл не найден, перенаправляем на страницу ошибки
-      if (response.status === 404) { // Если статус ответа 404 (файл не найден)
-        window.location.href = "../html/error.html"; // Перенаправляем пользователя на страницу ошибки
+    if (!response.ok) {
+      if (response.status === 404) {
+        window.location.href = "../html/error.html";
       }
-      throw new Error(`HTTP error! status: ${response.status}`); // Выбрасываем ошибку для других статусов
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return response.json(); // Преобразуем ответ в JSON-объект
+    return response.json();
   })
   .then(data => {
-    console.log('Данные успешно загружены:', data); // Логируем загруженные данные
-    const tableData = data; // Сохраняем данные в переменную
-    setupPagination(tableData); // Настраиваем пагинацию для данных
-    setupFilters(tableData); // Настраиваем фильтры для данных
+    console.log('Данные успешно загружены:', data);
+    globalData = data;
+    filteredData = [...data];
+    setupPagination(filteredData);
+    setupFilters();
   })
-  .catch(error => console.error('Ошибка загрузки JSON:', error)); // Обрабатываем ошибки загрузки
+  .catch(error => console.error('Ошибка загрузки JSON:', error));
 
 // Функция для отображения данных в таблице
 function renderTable(data) {
-  const tableBody = document.querySelector("#taskTable tbody"); // Находим тело таблицы по id
-  if (!tableBody) { // Если таблица не найдена
-    console.error('Таблица с id="taskTable" не найдена в HTML. Проверьте разметку.'); // Выводим ошибку
-    return; // Прекращаем выполнение функции
+  const tableBody = document.querySelector("#taskTable tbody");
+  if (!tableBody) {
+    console.error('Таблица с id="taskTable" не найдена в HTML. Проверьте разметку.');
+    return;
   }
-  tableBody.innerHTML = ""; // Очищаем содержимое таблицы перед добавлением новых данных
+  tableBody.innerHTML = "";
 
-  data.forEach(task => { // Перебираем массив данных
-    const row = document.createElement("tr"); // Создаем строку таблицы
+  data.forEach(task => {
+    const row = document.createElement("tr");
     row.innerHTML = `
-      <td class="number">${task.numberTask || ""}</td> <!-- Номер задания -->
-      <td class="number">${task.departTask || ""}</td> <!-- Отдел -->
-      <td>${task.masterName || ""}</td> <!-- Имя мастера -->
+      <td class="number">${task.numberTask || ""}</td>
+      <td class="number">${task.departTask || ""}</td>
+      <td>${task.masterName || ""}</td>
       <td>${formatWorkerName(task.workerName || "")}</td>
-      <td class="number">${task.dateIssue ? new Date(task.dateIssue).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : ""}</td> <!-- Дата выдачи -->
-      <td class="number">${task.dateAccept ? new Date(task.dateAccept).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : ""}</td> <!-- Дата принятия -->
+      <td class="number">${task.dateIssue ? new Date(task.dateIssue).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : ""}</td>
+      <td class="number">${task.dateAccept ? new Date(task.dateAccept).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : ""}</td>
     `;
 
-    // Добавляем обработчик клика на строку
     row.addEventListener("click", () => {
-      // Переход на table2.html с передачей номера задания через параметры URL
       window.location.href = `table2.html?numberTask=${task.numberTask}`;
     });
 
-    tableBody.appendChild(row); // Добавляем строку в таблицу
+    tableBody.appendChild(row);
   });
 
-  console.log('Таблица успешно отрендерена.'); // Логируем успешное завершение рендера
+  console.log('Таблица успешно отрендерена.');
 }
 
 // Функция для форматирования имени работника
 function formatWorkerName(workerName) {
-  const parts = workerName.split(" "); // Разделяем строку на части (Фамилия, Имя, Отчество)
+  const parts = workerName.split(" ");
   if (parts.length === 3) {
-    return `${parts[0]} ${parts[1]}<br>${parts[2]}`; // Фамилия и Имя на одной строке, Отчество на следующей
+    return `${parts[0]} ${parts[1]}<br>${parts[2]}`;
   }
-  return workerName; // Если формат не соответствует, возвращаем как есть
+  return workerName;
 }
 
 // Функция для настройки фильтров
-function setupFilters(data) {
-  const globalSearch = document.getElementById("globalSearch"); // Находим поле глобального поиска
-  const columnFilters = document.querySelectorAll(".column-filter"); // Находим фильтры для столбцов
+function setupFilters() {
+  const globalSearch = document.getElementById("globalSearch");
+  const columnFilters = document.querySelectorAll(".column-filter");
+  let filtersActive = false;
 
-  if (!globalSearch) { // Если поле глобального поиска не найдено
-    console.error('Поле глобального поиска с id="globalSearch" не найдено. Проверьте разметку.'); // Выводим ошибку
-    return; // Прекращаем выполнение функции
-  }
+  const applyFilters = () => {
+    const searchValue = globalSearch.value.toLowerCase();
+    const filters = Array.from(columnFilters).reduce((acc, input) => {
+      if (input.value) {
+        acc[input.dataset.column] = input.value.toLowerCase();
+      }
+      return acc;
+    }, {});
 
-  // Глобальный поиск
-  globalSearch.addEventListener("input", () => { // Отслеживаем ввод в поле глобального поиска
-    const searchValue = globalSearch.value.toLowerCase(); // Приводим введенное значение к нижнему регистру
-    const filteredData = data.filter(task => { // Фильтруем данные
-      return Object.entries(task).some(([key, value]) => { // Проверяем каждое поле объекта
-        if (key === "dateIssue" || key === "dateAccept") { // Если поле (ключ) — это "dateIssue" или "dateAccept"
-          // Преобразуем дату в локализованный формат
+    // Сохраняем начальную страницу при первом изменении фильтра
+    if (!filtersActive && (searchValue || Object.keys(filters).length > 0)) {
+      initialPage = parseInt(localStorage.getItem("currentPage")) || 1;
+      filtersActive = true;
+    }
+
+    filteredData = globalData.filter(task => {
+      // Глобальный поиск
+      const globalMatch = searchValue === '' || Object.entries(task).some(([key, value]) => {
+        if (key === "dateIssue" || key === "dateAccept") {
           const formattedDate = value
             ? new Date(value).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '')
             : "";
-          return formattedDate.includes(searchValue); // Проверяем, содержит ли дата введенное значение
+          return formattedDate.includes(searchValue);
         }
-        return String(value || "").toLowerCase().includes(searchValue); // Проверяем остальные поля
-      });
-    });
-    setupPagination(filteredData); // Обновляем пагинацию для отфильтрованных данных
-  });
-
-  // Фильтрация по столбцам
-  columnFilters.forEach(filter => { // Для каждого фильтра столбца
-    filter.addEventListener("input", () => { // Отслеживаем ввод
-      const filters = Array.from(columnFilters).reduce((acc, input) => { // Собираем значения всех фильтров
-        if (input.value) { // Если значение фильтра не пустое
-          acc[input.dataset.column] = input.value.toLowerCase(); // Сохраняем значение фильтра в объекте
-        }
-        return acc; // Возвращаем объект фильтров
-      }, {});
-
-      const filteredData = data.filter(task => { // Фильтруем данные
-        return Object.keys(filters).every(column => { // Проверяем, соответствует ли каждая запись всем фильтрам
-          const value = task[column]; // Получаем значение текущего столбца
-          if (column === "dateIssue" || column === "dateAccept") { // Если столбец — это дата
-            // Преобразуем дату в строку для сравнения
-            const formattedDate = value
-              ? new Date(value).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '')
-              : "";
-            return formattedDate.includes(filters[column]); // Проверяем, содержит ли дата введенное значение
-          }
-          return String(value || "").toLowerCase().includes(filters[column]); // Проверяем остальные поля
-        });
+        return String(value || "").toLowerCase().includes(searchValue);
       });
 
-      setupPagination(filteredData); // Обновляем пагинацию для отфильтрованных данных
+      // Фильтрация по столбцам
+      const columnMatch = Object.keys(filters).every(column => {
+        const value = task[column];
+        if (column === "dateIssue" || column === "dateAccept") {
+          const formattedDate = value
+            ? new Date(value).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '')
+            : "";
+          return formattedDate.includes(filters[column]);
+        }
+        return String(value || "").toLowerCase().includes(filters[column]);
+      });
+
+      return globalMatch && columnMatch;
     });
-  });
+
+    // Восстановление начальной страницы при сбросе фильтров
+    if (!searchValue && Object.keys(filters).length === 0 && filtersActive) {
+      setupPagination(filteredData, initialPage);
+      filtersActive = false;
+    } else {
+      setupPagination(filteredData);
+    }
+  };
+
+  globalSearch.addEventListener("input", applyFilters);
+  columnFilters.forEach(filter => filter.addEventListener("input", applyFilters));
 }
 
 // Функция для настройки пагинации
-function setupPagination(data) {
-  const rowsPerPage = 20; // Устанавливаем количество строк на странице
-  const totalPages = Math.ceil(data.length / rowsPerPage); // Вычисляем общее количество страниц
-  const paginationContainer = document.getElementById("pagination"); // Находим контейнер для пагинации
+function setupPagination(data, forcePage = null) {
+  const rowsPerPage = 20;
+  const totalPages = Math.ceil(data.length / rowsPerPage);
+  const paginationContainer = document.getElementById("pagination");
 
-  if (!paginationContainer) { // Если контейнер для пагинации не найден
-    console.error('Контейнер для пагинации с id="pagination" не найден. Проверьте разметку.'); // Выводим ошибку
-    return; // Прекращаем выполнение функции
+  if (!paginationContainer) {
+    console.error('Контейнер для пагинации с id="pagination" не найден. Проверьте разметку.');
+    return;
   }
 
-  paginationContainer.innerHTML = ""; // Очищаем содержимое контейнера пагинации
+  paginationContainer.innerHTML = "";
 
-  function renderPage(page) { // Функция для рендеринга страницы
-    const start = (page - 1) * rowsPerPage; // Вычисляем индекс начала
-    const end = start + rowsPerPage; // Вычисляем индекс конца
-    renderTable(data.slice(start, end)); // Рендерим таблицу с данными текущей страницы
+  function renderPage(page) {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    renderTable(data.slice(start, end));
   }
 
-  function createButton(label, page, isArrow = false) { // Функция для создания кнопки пагинации
-    const button = document.createElement("button"); // Создаем кнопку
-    button.textContent = label; // Устанавливаем текст кнопки
-    button.classList.add("pagination-btn"); // Добавляем класс для стилей
-    if (isArrow) button.classList.add("arrow-btn"); // Если это стрелка, добавляем соответствующий класс
-    button.addEventListener("click", () => { // Добавляем обработчик клика
-      renderPage(page); // Рендерим страницу при клике
-      updatePagination(page); // Обновляем пагинацию
+  function createButton(label, page, isArrow = false) {
+    const button = document.createElement("button");
+    button.textContent = label;
+    button.classList.add("pagination-btn");
+    if (isArrow) button.classList.add("arrow-btn");
+    button.addEventListener("click", () => {
+      renderPage(page);
+      updatePagination(page);
     });
-    return button; // Возвращаем созданную кнопку
+    return button;
   }
 
-  function updatePagination(currentPage) { // Функция для обновления отображения пагинации
-    paginationContainer.innerHTML = ""; // Очищаем содержимое контейнера пагинации
+  function updatePagination(currentPage) {
+    paginationContainer.innerHTML = "";
 
-    if (currentPage > 1) { // Если текущая страница больше первой
-      paginationContainer.appendChild(createButton("«", currentPage - 1, true)); // Добавляем кнопку "Назад"
+    if (totalPages > 1) {
+      if (currentPage > 1) {
+        paginationContainer.appendChild(createButton("«", currentPage - 1, true));
+      }
     }
 
-    const firstButton = createButton("1", 1); // Создаем кнопку для первой страницы
-    if (currentPage === 1) firstButton.classList.add("active"); // Если это первая страница, добавляем активный класс
-    paginationContainer.appendChild(firstButton); // Добавляем кнопку первой страницы
-
-    if (currentPage > 3) { // Если текущая страница больше третьей
-      const dots = document.createElement("span"); // Создаем элемент для многоточия
-      dots.textContent = "..."; // Устанавливаем текст многоточия
-      dots.classList.add("dots"); // Добавляем класс для стилей
-      paginationContainer.appendChild(dots); // Добавляем многоточие в контейнер
+    if (totalPages === 1) {
+      const singleButton = createButton("1", 1);
+      singleButton.classList.add("active");
+      paginationContainer.appendChild(singleButton);
+    } else {
+      const firstButton = createButton("1", 1);
+      if (currentPage === 1) firstButton.classList.add("active");
+      paginationContainer.appendChild(firstButton);
     }
 
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) { // Создаем кнопки для соседних страниц
-      const button = createButton(i, i); // Создаем кнопку для текущей страницы
-      if (i === currentPage) button.classList.add("active"); // Если это текущая страница, добавляем активный класс
-      paginationContainer.appendChild(button); // Добавляем кнопку в контейнер
+    if (totalPages > 1) {
+      if (currentPage > 3) {
+        const dots = document.createElement("span");
+        dots.textContent = "...";
+        dots.classList.add("dots");
+        paginationContainer.appendChild(dots);
+      }
+
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+        const button = createButton(i, i);
+        if (i === currentPage) button.classList.add("active");
+        paginationContainer.appendChild(button);
+      }
+
+      if (currentPage < totalPages - 2) {
+        const dots = document.createElement("span");
+        dots.textContent = "...";
+        dots.classList.add("dots");
+        paginationContainer.appendChild(dots);
+      }
+
+      const lastButton = createButton(totalPages, totalPages);
+      if (currentPage === totalPages) lastButton.classList.add("active");
+      paginationContainer.appendChild(lastButton);
+
+      if (currentPage < totalPages) {
+        paginationContainer.appendChild(createButton("»", currentPage + 1, true));
+      }
     }
 
-    if (currentPage < totalPages - 2) { // Если текущая страница меньше, чем за две страницы до последней
-      const dots = document.createElement("span"); // Создаем элемент для многоточия
-      dots.textContent = "..."; // Устанавливаем текст многоточия
-      dots.classList.add("dots"); // Добавляем класс для стилей
-      paginationContainer.appendChild(dots); // Добавляем многоточие в контейнер
-    }
-
-    const lastButton = createButton(totalPages, totalPages); // Создаем кнопку для последней страницы
-    if (currentPage === totalPages) lastButton.classList.add("active"); // Если это последняя страница, добавляем активный класс
-    paginationContainer.appendChild(lastButton); // Добавляем кнопку последней страницы
-
-    if (currentPage < totalPages) { // Если текущая страница меньше последней
-      paginationContainer.appendChild(createButton("»", currentPage + 1, true)); // Добавляем кнопку "Вперед"
-    }
-
-    localStorage.setItem("currentPage", currentPage); // Сохраняем текущую страницу в localStorage
+    localStorage.setItem("currentPage", currentPage);
   }
 
-  const currentPage = parseInt(localStorage.getItem("currentPage")) || 1; // Получаем текущую страницу из localStorage или устанавливаем 1
-  updatePagination(currentPage); // Обновляем отображение пагинации
-  renderPage(currentPage); // Рендерим текущую страницу
+  const currentPage = forcePage !== null
+    ? Math.min(forcePage, totalPages)
+    : Math.min(parseInt(localStorage.getItem("currentPage")) || 1, totalPages);
+
+  updatePagination(currentPage);
+  renderPage(currentPage);
 }
