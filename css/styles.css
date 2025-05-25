@@ -1,127 +1,118 @@
 /* Основные стили для страницы */
 body {
-  font-family: Arial, sans-serif; /* Устанавливаем шрифт для текста на странице. Arial будет основным, а sans-serif — запасным. */
-  margin: 20px; /* Добавляем отступы вокруг всей страницы, чтобы контент не прилипал к краям окна. */
-  background-color: #f9f9f9; /* Устанавливаем светло-серый цвет фона для всей страницы. */
-  color: #333; /* Устанавливаем темно-серый цвет текста для лучшей читаемости. */
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background-color: #f9f9f9;
+  color: #333;
 }
 
 /* Стили для заголовка */
 h1 {
-  text-align: center; /* Выравниваем текст заголовка по центру страницы. */
-  color: #444; /* Устанавливаем цвет заголовка чуть светлее, чем основной текст, чтобы он выделялся. */
-  margin: 0; /* Убираем отступы вокруг заголовка */
+  text-align: center;
+  color: #444;
+  margin: 0;
 }
 
 .custom-header {
-  margin: 20px 0; /* Устанавливаем отступ сверху и снизу для кастомного заголовка. */
+  margin: 20px 0;
 }
 
-/* Стили для заголовка на странице задания */
 .task-header {
-  background-color: #0056b3; /* Устанавливаем синий цвет фона для заголовка задачи. */
-  color: white; /* Устанавливаем белый цвет текста заголовка. */
-  padding: 10px; /* Добавляем отступы вокруг текста заголовка. */
-  text-align: center; /* Центрируем текст заголовка. */
+  background-color: #0056b3;
+  color: white;
+  padding: 10px;
+  text-align: center;
+}
+
+/* Стили для шапки с кнопками */
+#header {
+  background-color: #007bff;
+  color: white;
+  padding: 15px;
+  margin: 0 0 20px 0;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 6px 0; /* Разумные отступы между строками */
+}
+
+.header-row p {
+  margin: 0;
 }
 
 /* Стили для контейнера с фильтром */
 .filter-container {
-  margin-bottom: 20px; /* Добавляем отступ снизу, чтобы отделить фильтр от остального контента. */
-  text-align: center; /* Центрируем содержимое контейнера (например, поле ввода). */
+  margin-bottom: 20px;
+  text-align: center;
 }
 
-/* Стили для поля ввода фильтра */
 .filter-container input {
-  padding: 10px; /* Добавляем внутренние отступы, чтобы текст в поле ввода не прилипал к краям. */
-  width: 50%; /* Устанавливаем ширину поля ввода на 50% от ширины родительского контейнера. */
-  border: 1px solid #ccc; /* Добавляем светло-серую границу вокруг поля ввода. */
-  border-radius: 5px; /* Скругляем углы поля ввода. */
-  font-size: 16px; /* Устанавливаем размер шрифта для текста внутри поля ввода. */
+  padding: 10px;
+  width: 50%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
 }
 
 /* Стили для таблицы */
 table {
-  width: 70%; /* Таблица занимает 70% ширины страницы. */
-  margin: 0 auto; /* Центрируем таблицу на странице. */
-  border-collapse: collapse; /* Убираем двойные границы между ячейками таблицы. */
-  margin-top: 20px; /* Добавляем отступ сверху, чтобы таблица не прилипала к предыдущему элементу. */
-  background-color: #fff; /* Устанавливаем белый цвет фона таблицы. */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Добавляем легкую тень вокруг таблицы для визуального выделения. */
+  width: 70%;
+  margin: 0 auto;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Стили для ячеек таблицы */
 th, td {
-  border: 1px solid #ddd; /* Добавляем светло-серую границу вокруг каждой ячейки таблицы. */
-  padding: 10px; /* Добавляем внутренние отступы, чтобы текст не прилипал к краям ячеек. */
-  text-align: center; /* Центрируем текст по горизонтали. */
-  vertical-align: middle; /* Центрируем текст по вертикали. */
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  vertical-align: middle;
 }
 
-/* Стили для заголовков таблицы */
 th {
-  background-color: #f4f4f4; /* Устанавливаем светло-серый цвет фона для заголовков таблицы. */
-  position: sticky; /* Делаем заголовки "липкими", чтобы они оставались видимыми при прокрутке таблицы. */
-  top: 0; /* Указываем, что заголовки должны оставаться на самом верху таблицы. */
-  z-index: 1; /* Устанавливаем приоритет отображения заголовков, чтобы они перекрывали другие элементы. */
-  text-align: center; /* Центрируем текст заголовков. */
+  background-color: #f4f4f4;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
-/* Стили для полей ввода в заголовках */
 th input {
-  width: 100%; /* Поле ввода внутри заголовка занимает всю ширину ячейки. */
-  padding: 5px; /* Добавляем внутренние отступы, чтобы текст в поле ввода не прилипал к краям. */
-  box-sizing: border-box; /* Учитываем границы и отступы в общей ширине поля ввода. */
-  border: 1px solid #ccc; /* Добавляем светло-серую границу вокруг поля ввода. */
-  border-radius: 3px; /* Скругляем углы поля ввода. */
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 3px;
 }
 
-/* Устанавливаем цвет фона строк таблицы */
 tr {
-  background-color: #fff; /* Устанавливаем белый цвет фона для всех строк таблицы. */
+  background-color: #fff;
 }
 
-/* Стили для строки при наведении */
 tr:hover {
-  background-color: #f1f1f1; /* Меняем цвет фона строки на более светлый при наведении мыши. */
+  background-color: #f1f1f1;
 }
 
-/* Стили для текста в ячейках */
 td {
-  font-size: 14px; /* Устанавливаем размер шрифта для текста в ячейках таблицы. */
-  text-align: left; /* Выравниваем текст по левому краю. */
+  font-size: 14px;
+  text-align: left;
 }
 
-/* Стили для чисел в ячейках */
 th.number, td.number {
-  text-align: right; /* Выравниваем текст по правому краю для числовых данных. */
+  text-align: right;
 }
 
-/* Стили для блока информации */
-#header {
-  background-color: #007bff; /* Устанавливаем цвет фона блока информации чуть светлее, чем шапка. */
-  color: white; /* Устанавливаем белый цвет текста для лучшей читаемости. */
-  padding: 15px; /* Добавляем отступы вокруг текста в блоке. */
-  margin: 0 0 20px 0; /* Убираем верхний отступ и оставляем только нижний. */
-}
-
-/* Стили для кнопок */
-#buttonContainer {
-  display: flex; /* Располагаем кнопки в строку */
-  justify-content: flex-start; /* Центрируем кнопки */
-  gap: 10px; /* Добавляем расстояние между кнопками */
-  margin-top: 20px; /* Отступ сверху */
-}
-
-#editValuesButton,
-#saveChangesButton,
-#backToList {
+/* Общие стили для всех кнопок */
+#buttonContainer button {
   display: inline-block;
   padding: 10px 20px;
   font-size: 16px;
   font-weight: bold;
   color: #fff;
-  background: linear-gradient(90deg, #007bff, #0056b3);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -129,59 +120,108 @@ th.number, td.number {
   transition: all 0.3s ease;
 }
 
-#editValuesButton:hover,
-#saveChangesButton:hover,
-#backToList:hover {
-  background: linear-gradient(90deg, #0056b3, #003f7f);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+.date-container {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Оптимальный зазор */
+  width: 100%;
+  justify-content: flex-start;
+  padding: 4px 0;
 }
 
-#editValuesButton:active,
-#saveChangesButton:active,
-#backToList:active {
+.inverted-btn {
+  background: white !important;
+  color: #007bff !important;
+  border: 1px solid #007bff !important;
+  padding: 6px 12px !important; /* Компактный размер */
+  transition: all 0.3s ease !important;
+  font-family: Arial, sans-serif !important;
+  font-weight: bold !important;
+  font-size: 14px !important;
+}
+
+.inverted-btn:hover {
+  background: #f5f5f5 !important;
+  color: #0056b3 !important;
+  border-color: #0056b3 !important;
+}
+
+/* Стили для кнопок с датами */
+.date-btn {
+  margin-left: 12px !important;
+  white-space: nowrap;
+}
+
+.date-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 !important;
+}
+
+/* Специфичные стили для кнопок */
+#backToList {
+  background: linear-gradient(90deg, #6c757d, #5a6268);
+}
+
+#editValuesButton {
+  background: linear-gradient(90deg, #007bff, #0056b3);
+}
+
+/* Ховер-эффекты */
+#backToList:hover {
+  background: linear-gradient(90deg, #5a6268, #4a5257);
+}
+
+#editValuesButton:hover {
+  background: linear-gradient(90deg, #0056b3, #003f7f);
+}
+
+/* Активное состояние кнопок */
+#buttonContainer button:active {
   transform: scale(0.98);
 }
 
 /* Стили для пагинации */
 #pagination {
-  display: flex; /* Используем flexbox для выравнивания элементов пагинации. */
-  justify-content: center; /* Центрируем элементы пагинации. */
-  margin-top: 20px; /* Добавляем отступ сверху. */
-  gap: 5px; /* Добавляем расстояние между кнопками пагинации. */
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 5px;
 }
 
 #pagination .pagination-btn {
-  display: inline-block; /* Делаем элементы пагинации блочными. */
-  padding: 8px 12px; /* Добавляем внутренние отступы. */
-  border: 1px solid #ddd; /* Добавляем границу вокруг элементов пагинации. */
-  border-radius: 5px; /* Скругляем углы элементов. */
-  background-color: #f4f4f4; /* Устанавливаем светло-серый цвет фона для кнопок пагинации. */
-  color: #333; /* Устанавливаем темно-серый цвет текста для кнопок. */
-  text-decoration: none; /* Убираем подчеркивание текста. */
-  font-size: 14px; /* Устанавливаем размер шрифта для кнопок. */
-  cursor: pointer; /* Устанавливаем указатель мыши в виде руки. */
-  transition: background-color 0.3s, color 0.3s; /* Добавляем плавный переход для изменения цвета фона и текста. */
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f4f4f4;
+  color: #333;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 #pagination .pagination-btn:hover {
-  background-color: #007bff; /* Устанавливаем синий цвет фона при наведении. */
-  color: #fff; /* Устанавливаем белый цвет текста при наведении. */
+  background-color: #007bff;
+  color: #fff;
 }
 
 #pagination .pagination-btn.active {
-  background-color: #007bff; /* Устанавливаем синий цвет фона для активного элемента. */
-  color: #fff; /* Устанавливаем белый цвет текста для активного элемента. */
-  pointer-events: none; /* Отключаем возможность клика по активному элементу. */
+  background-color: #007bff;
+  color: #fff;
+  pointer-events: none;
 }
 
 #pagination .arrow-btn {
-  font-weight: bold; /* Делаем стрелки жирными. */
-  font-size: 16px; /* Увеличиваем размер шрифта для стрелок. */
+  font-weight: bold;
+  font-size: 16px;
 }
 
 #pagination .dots {
-  display: inline-block; /* Делаем точки блочными. */
-  padding: 8px 12px; /* Добавляем внутренние отступы. */
-  color: #999; /* Устанавливаем светло-серый цвет текста для точек. */
-  font-size: 14px; /* Устанавливаем размер шрифта для точек. */
+  display: inline-block;
+  padding: 8px 12px;
+  color: #999;
+  font-size: 14px;
 }
