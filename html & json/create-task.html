@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Создание задания</title>
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+  <div class="task-container">
+    <h1 class="task-header">Создание нового задания</h1>
+
+    <form id="createForm">
+      <div class="form-group">
+        <label>Номер задания:</label>
+        <input type="text" id="taskNumber" required>
+      </div>
+
+      <div class="form-group">
+        <label>Цех:</label>
+        <input type="text" id="department" required>
+      </div>
+
+      <div class="form-group">
+        <label>Мастер:</label>
+        <input type="text" id="master" required>
+      </div>
+
+      <div class="form-group">
+        <label>Работник:</label>
+        <input type="text" id="worker" required>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="create-btn">Создать</button>
+        <a href="table.html" class="cancel-btn">Отмена</a>
+      </div>
+    </form>
+  </div>
+
+  <script src="../js/create-task.js"></script>
+</body>
+</html>
