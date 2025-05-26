@@ -7,6 +7,12 @@ function formatDateTime(date) {
   return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+function truncateToMinutes(date) {
+  const newDate = new Date(date);
+  newDate.setSeconds(0, 0);
+  return newDate;
+}
+
 function saveHeaderToLocalStorage() {
   const headerData = {
     numberTask: document.getElementById("headerNumberTask").textContent.trim(),
@@ -18,16 +24,42 @@ function saveHeaderToLocalStorage() {
 }
 
 document.getElementById("issueTaskBtn").addEventListener("click", () => {
+  const newDate = truncateToMinutes(new Date());
   const dateIssue = document.getElementById("headerDateIssue");
-  dateIssue.textContent = formatDateTime(new Date());
+  const dateAccept = document.getElementById("headerDateAccept");
+  const acceptDate = parseCustomDate(dateAccept.textContent);
+
+  if (acceptDate && newDate > truncateToMinutes(acceptDate)) {
+    alert("Дата выдачи не может быть позже даты принятия");
+    return;
+  }
+
+  dateIssue.textContent = formatDateTime(newDate);
   dateIssue.dataset.original = "true";
   saveHeaderToLocalStorage();
 });
 
 document.getElementById("acceptTaskBtn").addEventListener("click", () => {
-  const dateAccept = document.getElementById("headerDateAccept");
-  dateAccept.textContent = formatDateTime(new Date());
-  dateAccept.dataset.original = "true";
+  const newDate = truncateToMinutes(new Date());
+  const dateIssue = document.getElementById("headerDateIssue");
+  const dateAcceptElement = document.getElementById("headerDateAccept");
+  const issueDate = parseCustomDate(dateIssue.textContent);
+
+  if (!issueDate) {
+    alert("Сначала установите дату выдачи");
+    return;
+  }
+
+  const issueDateTruncated = truncateToMinutes(issueDate);
+  const newDateTruncated = truncateToMinutes(newDate);
+
+  if (newDateTruncated < issueDateTruncated) {
+    alert("Дата принятия не может быть раньше даты выдачи");
+    return;
+  }
+
+  dateAcceptElement.textContent = formatDateTime(newDate);
+  dateAcceptElement.dataset.original = "true";
   saveHeaderToLocalStorage();
 });
 
@@ -64,7 +96,10 @@ fetch('task.json')
 function parseCustomDate(dateString) {
   const str = dateString.trim().toLowerCase();
   const formats = [
-    { regex: /^\d{4}-\d{2}-\d{2}t\d{2}:\d{2}:\d{2}/i, parse: s => new Date(s) },
+    {
+      regex: /^\d{4}-\d{2}-\d{2}t\d{2}:\d{2}:\d{2}/i,
+      parse: s => truncateToMinutes(new Date(s))
+    },
     {
       regex: /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/,
       parse: s => new Date(s.replace(/(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})/, "$3-$2-$1T$4:$5:00"))
@@ -106,6 +141,10 @@ function renderTable(data) {
     const uniqueKey = `${task.numberSP}-${task.numberOperation}`;
     const originalIssued = originalIssuedMap.get(uniqueKey) || 0;
 
+    const countIssued = parseInt(task.countIssued) || 0;
+    const countAccepted = parseInt(task.countAccepted) || 0;
+    const discrepancy = countIssued - countAccepted;
+
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${task.numberSP || ""}</td>
@@ -120,9 +159,23 @@ function renderTable(data) {
         oninput="validateIssuedValue(this, ${originalIssued})"
       >${task.countIssued ?? ""}</td>
       <td contenteditable="true" class="editable countAccepted">${task.countAccepted ?? ""}</td>
+      <td class="discrepancy">${discrepancy}</td>
       <td contenteditable="true" class="editable percentage">${task.percentage ?? ""}</td>
     `;
     tableBody.appendChild(row);
+
+    const issuedCell = row.querySelector('.countIssued');
+    const acceptedCell = row.querySelector('.countAccepted');
+    const discrepancyCell = row.querySelector('.discrepancy');
+
+    const updateDiscrepancy = () => {
+      const issued = parseInt(issuedCell.textContent) || 0;
+      const accepted = parseInt(acceptedCell.textContent) || 0;
+      discrepancyCell.textContent = issued - accepted;
+    };
+
+    issuedCell.addEventListener('input', updateDiscrepancy);
+    acceptedCell.addEventListener('input', updateDiscrepancy);
   });
 }
 
@@ -157,7 +210,7 @@ editButton.addEventListener("click", () => {
 
     document.querySelectorAll("tr").forEach((row, rowIndex) => {
       const cells = row.querySelectorAll("td");
-      if (cells.length < 8) return;
+      if (cells.length < 9) return;
 
       const numberSP = cells[0].textContent.trim();
       const numberOperation = cells[3].textContent.trim();
@@ -166,7 +219,7 @@ editButton.addEventListener("click", () => {
 
       const currentIssued = parseInt(cells[5].textContent.trim()) || 0;
       const currentAccepted = parseInt(cells[6].textContent.trim()) || 0;
-      const percent = parseInt(cells[7].textContent.trim()) || 0;
+      const percent = parseInt(cells[8].textContent.trim()) || 0;
 
       if (currentIssued > originalIssued) {
         errors.push(`• Строка ${rowIndex}: Выданное (${currentIssued}) > Исходного (${originalIssued})`);
@@ -220,7 +273,7 @@ function saveToLocalStorage() {
       nameOperation: cells[4].textContent.trim(),
       countIssued: cells[5].textContent.trim(),
       countAccepted: cells[6].textContent.trim(),
-      percentage: cells[7].textContent.trim()
+      percentage: cells[8].textContent.trim()
     });
   });
 

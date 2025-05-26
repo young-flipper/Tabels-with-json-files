@@ -1,34 +1,36 @@
-// Загружаем данные из JSON-файла
 let globalData = [];
 let filteredData = [];
 let initialPage = 1;
 
-fetch('listTask.json')
-  .then(response => {
-    if (!response.ok) {
-      if (response.status === 404) {
-        window.location.href = "../html/error.html";
-      }
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-  })
-  .then(data => {
-    console.log('Данные успешно загружены:', data);
-    globalData = data;
-    filteredData = [...data];
+async function loadData() {
+  try {
+    // 1. Загрузка данных из listTask.json
+    const response = await fetch('../html/listTask.json');
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const jsonData = await response.json();
+
+    // 2. Загрузка локальных данных
+    const localData = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    // 3. Объединение данных (новые задания сверху)
+    globalData = [...localData, ...jsonData];
+    filteredData = [...globalData];
+
+    // 4. Инициализация интерфейса
     setupPagination(filteredData);
     setupFilters();
-  })
-  .catch(error => console.error('Ошибка загрузки JSON:', error));
 
-// Функция для отображения данных в таблице
+  } catch (error) {
+    console.error('Ошибка загрузки данных:', error);
+    if (error.message.includes('404')) {
+      window.location.href = "../html/error.html";
+    }
+  }
+}
+
 function renderTable(data) {
   const tableBody = document.querySelector("#taskTable tbody");
-  if (!tableBody) {
-    console.error('Таблица с id="taskTable" не найдена в HTML. Проверьте разметку.');
-    return;
-  }
+  if (!tableBody) return;
   tableBody.innerHTML = "";
 
   data.forEach(task => {
@@ -48,90 +50,66 @@ function renderTable(data) {
 
     tableBody.appendChild(row);
   });
-
-  console.log('Таблица успешно отрендерена.');
 }
 
-// Функция для форматирования имени работника
 function formatWorkerName(workerName) {
   const parts = workerName.split(" ");
-  if (parts.length === 3) {
-    return `${parts[0]} ${parts[1]}<br>${parts[2]}`;
-  }
-  return workerName;
+  return parts.length === 3
+    ? `${parts[0]} ${parts[1]}<br>${parts[2]}`
+    : workerName;
 }
 
-// Функция для настройки фильтров
 function setupFilters() {
   const globalSearch = document.getElementById("globalSearch");
   const columnFilters = document.querySelectorAll(".column-filter");
-  let filtersActive = false;
 
   const applyFilters = () => {
     const searchValue = globalSearch.value.toLowerCase();
     const filters = Array.from(columnFilters).reduce((acc, input) => {
-      if (input.value) {
-        acc[input.dataset.column] = input.value.toLowerCase();
-      }
+      if (input.value) acc[input.dataset.column] = input.value.toLowerCase();
       return acc;
     }, {});
 
-    // Сохраняем начальную страницу при первом изменении фильтра
-    if (!filtersActive && (searchValue || Object.keys(filters).length > 0)) {
-      initialPage = parseInt(localStorage.getItem("currentPage")) || 1;
-      filtersActive = true;
-    }
-
     filteredData = globalData.filter(task => {
-      // Глобальный поиск
       const globalMatch = searchValue === '' || Object.entries(task).some(([key, value]) => {
-        if (key === "dateIssue" || key === "dateAccept") {
-          const formattedDate = value
-            ? new Date(value).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '')
-            : "";
+        if (key.includes("date")) {
+          const formattedDate = new Date(value).toLocaleString('ru-RU', {
+            dateStyle: 'short',
+            timeStyle: 'short'
+          }).replace(',', '');
           return formattedDate.includes(searchValue);
         }
-        return String(value || "").toLowerCase().includes(searchValue);
+        return String(value).toLowerCase().includes(searchValue);
       });
 
-      // Фильтрация по столбцам
       const columnMatch = Object.keys(filters).every(column => {
         const value = task[column];
-        if (column === "dateIssue" || column === "dateAccept") {
-          const formattedDate = value
-            ? new Date(value).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '')
-            : "";
+        if (column.includes("date")) {
+          const formattedDate = new Date(value).toLocaleString('ru-RU', {
+            dateStyle: 'short',
+            timeStyle: 'short'
+          }).replace(',', '');
           return formattedDate.includes(filters[column]);
         }
-        return String(value || "").toLowerCase().includes(filters[column]);
+        return String(value).toLowerCase().includes(filters[column]);
       });
 
       return globalMatch && columnMatch;
     });
 
-    // Восстановление начальной страницы при сбросе фильтров
-    if (!searchValue && Object.keys(filters).length === 0 && filtersActive) {
-      setupPagination(filteredData, initialPage);
-      filtersActive = false;
-    } else {
-      setupPagination(filteredData);
-    }
+    setupPagination(filteredData);
   };
 
   globalSearch.addEventListener("input", applyFilters);
   columnFilters.forEach(filter => filter.addEventListener("input", applyFilters));
 }
 
-// Функция для настройки пагинации
 function setupPagination(data, forcePage = null) {
   const rowsPerPage = 20;
   const totalPages = Math.ceil(data.length / rowsPerPage);
   const paginationContainer = document.getElementById("pagination");
 
-  if (!paginationContainer) {
-    console.error('Контейнер для пагинации с id="pagination" не найден. Проверьте разметку.');
-    return;
-  }
+  if (!paginationContainer) return;
 
   paginationContainer.innerHTML = "";
 
@@ -212,3 +190,8 @@ function setupPagination(data, forcePage = null) {
   updatePagination(currentPage);
   renderPage(currentPage);
 }
+
+// Инициализация
+window.onload = () => {
+  loadData();
+};
