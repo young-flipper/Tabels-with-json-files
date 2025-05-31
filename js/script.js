@@ -71,24 +71,30 @@ function setupFilters() {
     }, {});
 
     filteredData = globalData.filter(task => {
-      const globalMatch = searchValue === '' || Object.entries(task).some(([key, value]) => {
-        if (key.includes("date")) {
-          const formattedDate = new Date(value).toLocaleString('ru-RU', {
-            dateStyle: 'short',
-            timeStyle: 'short'
-          }).replace(',', '');
-          return formattedDate.includes(searchValue);
-        }
-        return String(value).toLowerCase().includes(searchValue);
-      });
+      // Проверка только по видимым полям таблицы
+      const visibleFields = [
+        String(task.numberTask || ""),
+        String(task.departTask || ""),
+        String(task.masterName || ""),
+        String(task.workerName || ""),
+        task.dateIssue ? new Date(task.dateIssue).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : "",
+        task.dateAccept ? new Date(task.dateAccept).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : ""
+      ].map(field => field.toLowerCase());
 
+      // Глобальный поиск только по видимым полям
+      const globalMatch = searchValue === '' ||
+                         visibleFields.some(field => field.includes(searchValue));
+
+      // Проверка фильтров по колонкам
       const columnMatch = Object.keys(filters).every(column => {
         const value = task[column];
+        if (!value) return false;
+
         if (column.includes("date")) {
           const formattedDate = new Date(value).toLocaleString('ru-RU', {
             dateStyle: 'short',
             timeStyle: 'short'
-          }).replace(',', '');
+          }).replace(',', '').toLowerCase();
           return formattedDate.includes(filters[column]);
         }
         return String(value).toLowerCase().includes(filters[column]);
@@ -96,6 +102,11 @@ function setupFilters() {
 
       return globalMatch && columnMatch;
     });
+
+    // Очищаем таблицу если нет совпадений
+    if (filteredData.length === 0) {
+      document.querySelector("#taskTable tbody").innerHTML = "";
+    }
 
     setupPagination(filteredData);
   };
@@ -112,6 +123,10 @@ function setupPagination(data, forcePage = null) {
   if (!paginationContainer) return;
 
   paginationContainer.innerHTML = "";
+
+  if (data.length === 0) {
+    return;
+  }
 
   function renderPage(page) {
     const start = (page - 1) * rowsPerPage;
