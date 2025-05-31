@@ -254,10 +254,10 @@ function renderTable(data) {
 
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td>${task.numberSP || ""}</td>
+      <td class="number numberSP">${task.numberSP || ""}</td>
       <td>${task.nameSP || ""}</td>
       <td>${task.typeSizeSP || ""}</td>
-      <td>${task.numberOperation || ""}</td>
+      <td class="number">${task.numberOperation || ""}</td>
       <td>${task.nameOperation || ""}</td>
       <td
         contenteditable="true"
@@ -265,9 +265,9 @@ function renderTable(data) {
         data-original="${originalIssued}"
         oninput="validateIssuedValue(this, ${originalIssued})"
       >${task.countIssued ?? ""}</td>
-      <td contenteditable="true" class="editable countAccepted">${task.countAccepted ?? ""}</td>
-      <td class="discrepancy">${discrepancy}</td>
-      <td contenteditable="true" class="editable percentage">${task.percentage ?? ""}</td>
+      <td contenteditable="true" class="editable countAccepted number">${task.countAccepted ?? ""}</td>
+      <td class="discrepancy number">${discrepancy}</td>
+      <td contenteditable="true" class="editable percentage number">${task.percentage ?? ""}</td>
     `;
     tableBody.appendChild(row);
 
