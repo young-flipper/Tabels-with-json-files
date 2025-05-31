@@ -71,12 +71,15 @@ function updateButtonStates() {
   const dateIssue = document.getElementById("headerDateIssue");
   const dateAccept = document.getElementById("headerDateAccept");
 
+  // Проверяем наличие дат
   const hasIssueDate = dateIssue.textContent !== "—";
   const hasAcceptDate = dateAccept.textContent !== "—";
 
+  // Блокируем кнопки выдачи/принятия если обе даты уже установлены
   issueBtn.disabled = hasIssueDate && hasAcceptDate;
   acceptBtn.disabled = hasIssueDate && hasAcceptDate;
 
+  // Управляем стилями для кнопок выдачи/принятия
   if (issueBtn.disabled) {
     issueBtn.classList.add("disabled-btn");
   } else {
@@ -89,39 +92,73 @@ function updateButtonStates() {
     acceptBtn.classList.remove("disabled-btn");
   }
 
-  // Блокировка только ячеек количества при наличии даты принятия
+  // Получаем все редактируемые ячейки таблицы
   const countIssuedCells = document.querySelectorAll(".countIssued");
   const countAcceptedCells = document.querySelectorAll(".countAccepted");
   const percentageCells = document.querySelectorAll(".percentage");
 
-  const isLocked = hasAcceptDate;
+  /*
+   Новое условие блокировки:
+   - Если НЕТ даты выдачи (!hasIssueDate) - блокируем ВСЕ ячейки (выданные, принятые, процент)
+   - Если ЕСТЬ дата принятия (hasAcceptDate) - блокируем ТОЛЬКО "Кол-во выдано" и "Кол-во принято"
+   - Процент выполнения блокируется ТОЛЬКО при отсутствии даты выдачи
+  */
+  const isCountsLocked = !hasIssueDate || hasAcceptDate;
+  const isPercentageLocked = !hasIssueDate;
 
+  // Управляем ячейками "Кол-во выдано"
   countIssuedCells.forEach(cell => {
-    cell.contentEditable = isLocked ? "false" : "true";
-    if (isLocked) {
+    cell.contentEditable = isCountsLocked ? "false" : "true";
+    if (isCountsLocked) {
       cell.classList.add("disabled-cell");
     } else {
       cell.classList.remove("disabled-cell");
     }
   });
 
+  // Управляем ячейками "Кол-во принято"
   countAcceptedCells.forEach(cell => {
-    cell.contentEditable = isLocked ? "false" : "true";
-    if (isLocked) {
+    cell.contentEditable = isCountsLocked ? "false" : "true";
+    if (isCountsLocked) {
       cell.classList.add("disabled-cell");
     } else {
       cell.classList.remove("disabled-cell");
     }
   });
 
-  // Процент выполнения всегда редактируемый
+  // Управляем ячейками "Процент выполнения" (блокируются ТОЛЬКО при отсутствии даты выдачи)
   percentageCells.forEach(cell => {
-    cell.contentEditable = "true";
-    cell.classList.remove("disabled-cell");
+    cell.contentEditable = isPercentageLocked ? "false" : "true";
+    if (isPercentageLocked) {
+      cell.classList.add("disabled-cell");
+    } else {
+      cell.classList.remove("disabled-cell");
+    }
   });
+
+  /*
+   Блокировка кнопки "Изменить данные":
+   - Неактивна, если нет даты выдачи
+   - Активна, если есть дата выдачи (независимо от даты принятия)
+  */
+  const editButton = document.getElementById("editValuesButton");
+  if (!hasIssueDate) {
+    editButton.disabled = true;
+    editButton.classList.add("disabled-btn");
+  } else {
+    editButton.disabled = false;
+    editButton.classList.remove("disabled-btn");
+  }
+
+  /*
+   Дополнительная логика:
+   - Если есть дата принятия, ячейки количества остаются заблокированными,
+     но процент можно редактировать (isPercentageLocked проверяет только hasIssueDate)
+   - При отсутствии даты выдачи всё заблокировано (включая процент и кнопку редактирования)
+  */
 }
 
-fetch('task.json')
+fetch('../html/task.json')
   .then(response => {
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     return response.json();
@@ -252,28 +289,42 @@ const editButton = document.getElementById("editValuesButton");
 let isEditing = false;
 
 editButton.addEventListener("click", () => {
-  const editableCells = document.querySelectorAll(".editable");
   const dateIssue = document.getElementById("headerDateIssue");
   const dateAccept = document.getElementById("headerDateAccept");
+  const hasIssueDate = dateIssue.textContent !== "—";
+  const hasAcceptDate = dateAccept.textContent !== "—";
+
+  // ===== НОВАЯ ПРОВЕРКА =====
+  // Запрещаем редактирование если нет даты выдачи
+  if (!hasIssueDate) {
+    alert("Сначала установите дату выдачи задания");
+    return;
+  }
+
+  const editableCells = document.querySelectorAll(".editable");
 
   if (!isEditing) {
-    // Вход в режим редактирования
+    // ===== ВХОД В РЕЖИМ РЕДАКТИРОВАНИЯ =====
     editableCells.forEach(cell => {
       // Разрешаем редактирование только тех ячеек, которые не заблокированы
+      // (учитываем блокировку по дате принятия через класс disabled-cell)
       if (!cell.classList.contains("disabled-cell")) {
         cell.contentEditable = "true";
       }
     });
     editButton.textContent = "Сохранить изменения";
   } else {
-    // Выход из режима редактирования (сохранение)
+    // ===== ВЫХОД ИЗ РЕЖИМА РЕДАКТИРОВАНИЯ (СОХРАНЕНИЕ) =====
     let isValid = true;
     const errors = [];
 
+    // ===== СТАРАЯ ПРОВЕРКА =====
+    // Проверка обязательности даты выдачи (если она была установлена)
     if (dateIssue.dataset.original === "true" && !dateIssue.textContent.trim()) {
       errors.push("• Дата выдачи обязательна");
     }
 
+    // ===== ПРОВЕРКА ЗНАЧЕНИЙ В ТАБЛИЦЕ =====
     document.querySelectorAll("tr").forEach((row, rowIndex) => {
       const cells = row.querySelectorAll("td");
       if (cells.length < 9) return;
@@ -283,39 +334,44 @@ editButton.addEventListener("click", () => {
       const uniqueKey = `${numberSP}-${numberOperation}`;
       const originalIssued = originalIssuedMap.get(uniqueKey) || 0;
 
+      // ===== ПРОВЕРКА КОЛИЧЕСТВА ВЫДАННЫХ =====
       // Проверяем только если ячейка не заблокирована
       if (!cells[5].classList.contains("disabled-cell")) {
         const currentIssued = parseInt(cells[5].textContent.trim()) || 0;
         if (currentIssued > originalIssued) {
-          errors.push(`• Строка ${rowIndex}: Выданное (${currentIssued}) > Исходного (${originalIssued})`);
+          errors.push(`• Строка ${rowIndex + 1}: Выданное (${currentIssued}) > Исходного (${originalIssued})`);
           isValid = false;
         }
       }
 
+      // ===== ПРОВЕРКА КОЛИЧЕСТВА ПРИНЯТЫХ =====
+      // Проверяем только если ячейка не заблокирована
       if (!cells[6].classList.contains("disabled-cell")) {
         const currentIssued = parseInt(cells[5].textContent.trim()) || 0;
         const currentAccepted = parseInt(cells[6].textContent.trim()) || 0;
         if (currentAccepted > currentIssued) {
-          errors.push(`• Строка ${rowIndex}: Принятое (${currentAccepted}) > Выданного (${currentIssued})`);
+          errors.push(`• Строка ${rowIndex + 1}: Принятое (${currentAccepted}) > Выданного (${currentIssued})`);
           isValid = false;
         }
       }
 
-      // Проверка процента выполнения (всегда редактируемая ячейка)
+      // ===== ПРОВЕРКА ПРОЦЕНТА ВЫПОЛНЕНИЯ =====
+      // Проверяем всегда, так как процент можно редактировать даже при наличии даты принятия
       const percent = parseInt(cells[8].textContent.trim()) || 0;
       if (percent < 0 || percent > 100 || isNaN(percent)) {
-        errors.push(`• Строка ${rowIndex}: Процент (${percent}%) вне диапазона`);
+        errors.push(`• Строка ${rowIndex + 1}: Процент (${percent}%) вне диапазона`);
         isValid = false;
       }
     });
 
+    // ===== ОБРАБОТКА ОШИБОК =====
     const uniqueErrors = [...new Set(errors)];
     if (uniqueErrors.length > 0) {
       alert("Обнаружены ошибки:\n" + uniqueErrors.join("\n"));
       return;
     }
 
-    // Выходим из режима редактирования
+    // ===== ВЫХОД ИЗ РЕЖИМА РЕДАКТИРОВАНИЯ =====
     editableCells.forEach(cell => {
       if (!cell.classList.contains("disabled-cell")) {
         cell.contentEditable = "false";
