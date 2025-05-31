@@ -323,3 +323,15 @@ form#createForm .cancel-btn:hover {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   transform: translateY(-1px);
 }
+
+.disabled-btn {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+.inverted-btn.disabled-btn {
+  background: #f5f5f5 !important;
+  color: #999 !important;
+  border-color: #ddd !important;
+}
