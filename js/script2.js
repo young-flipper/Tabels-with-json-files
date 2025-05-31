@@ -28,7 +28,18 @@ document.getElementById("issueTaskBtn").addEventListener("click", () => {
   const dateIssue = document.getElementById("headerDateIssue");
   const dateAccept = document.getElementById("headerDateAccept");
   const acceptDate = parseCustomDate(dateAccept.textContent);
+  const issueDate = parseCustomDate(dateIssue.textContent);
 
+  // Если дата принятия уже установлена, а даты выдачи нет - используем дату принятия
+  if (acceptDate && !issueDate) {
+    dateIssue.textContent = formatDateTime(truncateToMinutes(acceptDate));
+    dateIssue.dataset.original = "true";
+    saveHeaderToLocalStorage();
+    updateButtonStates();
+    return;
+  }
+
+  // Старая проверка - если дата принятия есть и она раньше новой даты выдачи
   if (acceptDate && newDate > truncateToMinutes(acceptDate)) {
     alert("Дата выдачи не может быть позже даты принятия");
     return;
