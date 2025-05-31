@@ -105,6 +105,7 @@ td {
 
 th.number, td.number {
   text-align: right;
+  padding-right: 15px
 }
 
 /* Общие стили для всех кнопок */
@@ -344,9 +345,7 @@ form#createForm .cancel-btn:hover {
 }
 
 td.numberSP {
-  text-align: right;
   white-space: nowrap; /* Запрещаем перенос строк */
-  padding-right: 15px;
 }
 
 td.numberSP .number-part {
