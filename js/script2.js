@@ -37,6 +37,7 @@ document.getElementById("issueTaskBtn").addEventListener("click", () => {
   dateIssue.textContent = formatDateTime(newDate);
   dateIssue.dataset.original = "true";
   saveHeaderToLocalStorage();
+  updateButtonStates();
 });
 
 document.getElementById("acceptTaskBtn").addEventListener("click", () => {
@@ -61,7 +62,64 @@ document.getElementById("acceptTaskBtn").addEventListener("click", () => {
   dateAcceptElement.textContent = formatDateTime(newDate);
   dateAcceptElement.dataset.original = "true";
   saveHeaderToLocalStorage();
+  updateButtonStates();
 });
+
+function updateButtonStates() {
+  const issueBtn = document.getElementById("issueTaskBtn");
+  const acceptBtn = document.getElementById("acceptTaskBtn");
+  const dateIssue = document.getElementById("headerDateIssue");
+  const dateAccept = document.getElementById("headerDateAccept");
+
+  const hasIssueDate = dateIssue.textContent !== "—";
+  const hasAcceptDate = dateAccept.textContent !== "—";
+
+  issueBtn.disabled = hasIssueDate && hasAcceptDate;
+  acceptBtn.disabled = hasIssueDate && hasAcceptDate;
+
+  if (issueBtn.disabled) {
+    issueBtn.classList.add("disabled-btn");
+  } else {
+    issueBtn.classList.remove("disabled-btn");
+  }
+
+  if (acceptBtn.disabled) {
+    acceptBtn.classList.add("disabled-btn");
+  } else {
+    acceptBtn.classList.remove("disabled-btn");
+  }
+
+  // Блокировка только ячеек количества при наличии даты принятия
+  const countIssuedCells = document.querySelectorAll(".countIssued");
+  const countAcceptedCells = document.querySelectorAll(".countAccepted");
+  const percentageCells = document.querySelectorAll(".percentage");
+
+  const isLocked = hasAcceptDate;
+
+  countIssuedCells.forEach(cell => {
+    cell.contentEditable = isLocked ? "false" : "true";
+    if (isLocked) {
+      cell.classList.add("disabled-cell");
+    } else {
+      cell.classList.remove("disabled-cell");
+    }
+  });
+
+  countAcceptedCells.forEach(cell => {
+    cell.contentEditable = isLocked ? "false" : "true";
+    if (isLocked) {
+      cell.classList.add("disabled-cell");
+    } else {
+      cell.classList.remove("disabled-cell");
+    }
+  });
+
+  // Процент выполнения всегда редактируемый
+  percentageCells.forEach(cell => {
+    cell.contentEditable = "true";
+    cell.classList.remove("disabled-cell");
+  });
+}
 
 fetch('task.json')
   .then(response => {
@@ -90,6 +148,7 @@ fetch('task.json')
 
     updateHeader(finalHeader);
     renderTable(finalData);
+    updateButtonStates();
   })
   .catch(error => console.error('Ошибка:', error));
 
@@ -198,9 +257,16 @@ editButton.addEventListener("click", () => {
   const dateAccept = document.getElementById("headerDateAccept");
 
   if (!isEditing) {
-    editableCells.forEach(cell => cell.contentEditable = "true");
+    // Вход в режим редактирования
+    editableCells.forEach(cell => {
+      // Разрешаем редактирование только тех ячеек, которые не заблокированы
+      if (!cell.classList.contains("disabled-cell")) {
+        cell.contentEditable = "true";
+      }
+    });
     editButton.textContent = "Сохранить изменения";
   } else {
+    // Выход из режима редактирования (сохранение)
     let isValid = true;
     const errors = [];
 
@@ -217,20 +283,26 @@ editButton.addEventListener("click", () => {
       const uniqueKey = `${numberSP}-${numberOperation}`;
       const originalIssued = originalIssuedMap.get(uniqueKey) || 0;
 
-      const currentIssued = parseInt(cells[5].textContent.trim()) || 0;
-      const currentAccepted = parseInt(cells[6].textContent.trim()) || 0;
+      // Проверяем только если ячейка не заблокирована
+      if (!cells[5].classList.contains("disabled-cell")) {
+        const currentIssued = parseInt(cells[5].textContent.trim()) || 0;
+        if (currentIssued > originalIssued) {
+          errors.push(`• Строка ${rowIndex}: Выданное (${currentIssued}) > Исходного (${originalIssued})`);
+          isValid = false;
+        }
+      }
+
+      if (!cells[6].classList.contains("disabled-cell")) {
+        const currentIssued = parseInt(cells[5].textContent.trim()) || 0;
+        const currentAccepted = parseInt(cells[6].textContent.trim()) || 0;
+        if (currentAccepted > currentIssued) {
+          errors.push(`• Строка ${rowIndex}: Принятое (${currentAccepted}) > Выданного (${currentIssued})`);
+          isValid = false;
+        }
+      }
+
+      // Проверка процента выполнения (всегда редактируемая ячейка)
       const percent = parseInt(cells[8].textContent.trim()) || 0;
-
-      if (currentIssued > originalIssued) {
-        errors.push(`• Строка ${rowIndex}: Выданное (${currentIssued}) > Исходного (${originalIssued})`);
-        isValid = false;
-      }
-
-      if (currentAccepted > currentIssued) {
-        errors.push(`• Строка ${rowIndex}: Принятое (${currentAccepted}) > Выданного (${currentIssued})`);
-        isValid = false;
-      }
-
       if (percent < 0 || percent > 100 || isNaN(percent)) {
         errors.push(`• Строка ${rowIndex}: Процент (${percent}%) вне диапазона`);
         isValid = false;
@@ -243,7 +315,12 @@ editButton.addEventListener("click", () => {
       return;
     }
 
-    editableCells.forEach(cell => cell.contentEditable = "false");
+    // Выходим из режима редактирования
+    editableCells.forEach(cell => {
+      if (!cell.classList.contains("disabled-cell")) {
+        cell.contentEditable = "false";
+      }
+    });
     editButton.textContent = "Изменить данные";
     saveToLocalStorage();
   }
@@ -279,4 +356,5 @@ function saveToLocalStorage() {
 
   localStorage.setItem(`taskData_${numberTask}`, JSON.stringify(updatedData));
   localStorage.setItem(`headerData_${numberTask}`, JSON.stringify(headerData));
+  updateButtonStates();
 }
