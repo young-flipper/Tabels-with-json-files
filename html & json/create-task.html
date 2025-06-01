@@ -12,23 +12,31 @@
 
     <form id="createForm">
       <div class="form-group">
-        <label>Номер задания:</label>
-        <input type="text" id="taskNumber" required>
+        <label>Номер задания: <small class="example">Пример: 1217/393-05 062023</small></label>
+        <input type="text" id="taskNumber" required
+               pattern="^\d{1,4}/\d{3}-\d{2} \d{6}$"
+               title="Формат: 1-4 цифры / 3 цифры - 2 цифры пробел 6 цифр">
       </div>
 
       <div class="form-group">
-        <label>Цех:</label>
-        <input type="text" id="department" required>
+        <label>Цех: <small class="example">Пример: 518</small></label>
+        <input type="text" id="department" required
+               pattern="^\d{3}$" maxlength="3"
+               title="Только 3 цифры">
       </div>
 
       <div class="form-group">
-        <label>Мастер:</label>
-        <input type="text" id="master" required>
+        <label>Мастер: <small class="example">Пример: 037-Осипова-НН</small></label>
+        <input type="text" id="master" required
+               pattern="^\d{3}-[А-Яа-яЁё]+-[А-Яа-яЁё]{2}$"
+               title="Формат: 3 цифры - Фамилия - Инициалы">
       </div>
 
       <div class="form-group">
-        <label>Работник:</label>
-        <input type="text" id="worker" required>
+        <label>Работник: <small class="example">Пример: Майорова Елена Владимировна</small></label>
+        <input type="text" id="worker" required
+               pattern="^[А-ЯЁ][а-яё]+\s[А-ЯЁ][а-яё]+\s[А-ЯЁ][а-яё]+$"
+               title="Три слова (ФИО) через пробел (кириллица)">
       </div>
 
       <div class="button-group">
