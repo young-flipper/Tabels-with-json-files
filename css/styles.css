@@ -18,6 +18,7 @@ body {
   justify-content: space-between;
   height: 100vh;
   text-align: center;
+  background-color: white;
 }
 
 .error-page img {
@@ -156,9 +157,25 @@ th.number, td.number {
 }
 
 /* Общие стили для всех кнопок */
-#buttonContainer button {
-  display: inline-block;
+#buttonContainer {
+  display: flex;
+  gap: 8px; /* Единый отступ между всеми элементами */
+  align-items: center;
+  margin: 0; /* Сбрасываем возможные внешние отступы */
+  padding: 0; /* Сбрасываем возможные внутренние отступы */
+}
+
+/* Общие стили для всех кнопок */
+#buttonContainer button,
+#addRowBtn,
+.create-btn,
+.inverted-btn {
+  margin-left: 0 !important; /* Отменяем все индивидуальные отступы */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 10px 20px;
+  font-family: Arial, sans-serif;
   font-size: 16px;
   font-weight: bold;
   color: #fff;
@@ -167,32 +184,51 @@ th.number, td.number {
   cursor: pointer;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  white-space: nowrap;
+  height: 40px;
+  line-height: 1;
+  box-sizing: border-box;
+  text-decoration: none;
 }
 
+/* Специфичные стили для кнопок (только цвета) */
+#backToList {
+  background: linear-gradient(90deg, #6c757d, #5a6268);
+}
+
+#editValuesButton {
+  background: linear-gradient(90deg, #007bff, #0056b3);
+}
+
+#addRowBtn {
+  background: linear-gradient(90deg, #28a745, #218838);
+}
+
+.create-btn {
+  background: linear-gradient(90deg, #007bff, #0056b3);
+}
+
+/* Для кнопок с датами используем gap вместо margin */
 .date-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 8px; /* Используем gap вместо margin */
   width: 100%;
   justify-content: flex-start;
   padding: 4px 0;
 }
 
 .inverted-btn {
-  background: white !important;
-  color: #007bff !important;
-  border: 1px solid #007bff !important;
-  padding: 6px 12px !important;
-  transition: all 0.3s ease !important;
-  font-family: Arial, sans-serif !important;
-  font-weight: bold !important;
-  font-size: 14px !important;
+  background: white;
+  color: #007bff;
+  border: 1px solid #007bff;
+  padding: 6px 12px;
 }
 
 .inverted-btn:hover {
-  background: #f5f5f5 !important;
-  color: #0056b3 !important;
-  border-color: #0056b3 !important;
+  background: #f5f5f5;
+  color: #0056b3;
+  border-color: #0056b3;
 }
 
 /* Стили для кнопок с датами */
@@ -208,13 +244,19 @@ th.number, td.number {
   margin: 0 !important;
 }
 
-/* Специфичные стили для кнопок */
+/* Специфичные стили для кнопок (только цвета) */
 #backToList {
   background: linear-gradient(90deg, #6c757d, #5a6268);
 }
 
 #editValuesButton {
   background: linear-gradient(90deg, #007bff, #0056b3);
+}
+
+#addRowBtn {
+  background: linear-gradient(90deg, #28a745, #218838);
+  color: #fff !important; /* Явное указание белого цвета */
+  font-size: 16px !important; /* Явное указание размера шрифта */
 }
 
 /* Ховер-эффекты */
@@ -226,8 +268,16 @@ th.number, td.number {
   background: linear-gradient(90deg, #0056b3, #003f7f);
 }
 
+#addRowBtn:hover {
+  background: linear-gradient(90deg, #218838, #1e7e34);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
 /* Активное состояние кнопок */
-#buttonContainer button:active {
+#buttonContainer button:active,
+#addRowBtn:active,
+.create-btn:active,
+.inverted-btn:active {
   transform: scale(0.98);
 }
 
@@ -299,8 +349,7 @@ th.number, td.number {
 }
 
 .create-btn:hover {
-  background: linear-gradient(90deg, #0056b3, #003f7f) !important;
-  text-decoration: none !important;
+  background: linear-gradient(90deg, #0056b3, #003f7f);
 }
 
 .task-container {
@@ -372,16 +421,17 @@ form#createForm .cancel-btn:hover {
   transform: translateY(-1px);
 }
 
+/* Состояние disabled */
 .disabled-btn {
-  opacity: 0.6 !important;
-  cursor: not-allowed !important;
-  pointer-events: none !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .inverted-btn.disabled-btn {
-  background: #f5f5f5 !important;
-  color: #999 !important;
-  border-color: #ddd !important;
+  background: #f5f5f5;
+  color: #999;
+  border-color: #ddd;
 }
 
 .disabled-cell {
@@ -424,4 +474,68 @@ input:invalid {
   color: #666;
   font-size: 0.9em;
   margin-left: 8px;
+}
+
+#addRowBtn {
+  background: linear-gradient(90deg, #28a745, #218838) !important;
+}
+
+#addRowBtn:hover {
+  background: linear-gradient(90deg, #218838, #1e7e34) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+#addRowBtn:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+/* Фиксированные ширины столбцов ТОЛЬКО для table2.html */
+body:has(#header) #taskTable {
+  table-layout: fixed;
+}
+
+body:has(#header) #taskTable th:nth-child(1),
+body:has(#header) #taskTable td:nth-child(1) {
+  width: 100px; /* Номер СП */
+}
+
+body:has(#header) #taskTable th:nth-child(2),
+body:has(#header) #taskTable td:nth-child(2) {
+  width: 130px; /* Наименование */
+}
+
+body:has(#header) #taskTable th:nth-child(3),
+body:has(#header) #taskTable td:nth-child(3) {
+  width: 130px; /* Типоразмер */
+}
+
+body:has(#header) #taskTable th:nth-child(4),
+body:has(#header) #taskTable td:nth-child(4) {
+  width: 80px; /* Номер операции */
+}
+
+body:has(#header) #taskTable th:nth-child(5),
+body:has(#header) #taskTable td:nth-child(5) {
+  width: 150px; /* Наименование операции */
+}
+
+body:has(#header) #taskTable th:nth-child(6),
+body:has(#header) #taskTable td:nth-child(6) {
+  width: 70px; /* Кол-во выдано */
+}
+
+body:has(#header) #taskTable th:nth-child(7),
+body:has(#header) #taskTable td:nth-child(7) {
+  width: 70px; /* Кол-во принято */
+}
+
+body:has(#header) #taskTable th:nth-child(8),
+body:has(#header) #taskTable td:nth-child(8) {
+  width: 170px; /* Несоответствующие ДСЕ */
+}
+
+body:has(#header) #taskTable th:nth-child(9),
+body:has(#header) #taskTable td:nth-child(9) {
+  width: 120px; /* Процент выполнения */
 }
