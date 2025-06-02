@@ -33,7 +33,12 @@ function renderTable(data) {
   if (!tableBody) return;
   tableBody.innerHTML = "";
 
+  // Получаем список пользовательских заданий
+  const localTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  const userTaskNumbers = localTasks.map(task => task.numberTask);
+
   data.forEach(task => {
+    const isUserTask = userTaskNumbers.includes(task.numberTask);
     const row = document.createElement("tr");
     row.innerHTML = `
       <td class="number">${task.numberTask || ""}</td>
@@ -43,6 +48,11 @@ function renderTable(data) {
       <td class="number">${task.dateIssue ? new Date(task.dateIssue).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : ""}</td>
       <td class="number">${task.dateAccept ? new Date(task.dateAccept).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).replace(',', '') : ""}</td>
     `;
+
+    // Добавляем data-атрибут для идентификации пользовательских заданий
+    if (isUserTask) {
+      row.dataset.userTask = "true";
+    }
 
     row.addEventListener("click", () => {
       window.location.href = `table2.html?numberTask=${task.numberTask}`;
