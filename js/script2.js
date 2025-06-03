@@ -2,6 +2,9 @@ const urlParams = new URLSearchParams(window.location.search);
 const numberTask = urlParams.get("numberTask");
 let originalIssuedMap = new Map();
 
+// Определяем столбцы, которые нужно объединять (Номер СП, Наименование, Типоразмер)
+const MERGE_COLUMNS = [0, 1, 2];
+
 // Форматирование даты и времени в строку
 function formatDateTime(date) {
   const pad = n => n.toString().padStart(2, '0');
@@ -170,6 +173,62 @@ function updateButtonStates() {
   }
 }
 
+// Функция для объединения ячеек в столбце
+function mergeCellsInColumn(tableBody, colIndex) {
+  const rows = tableBody.querySelectorAll('tr');
+  if (rows.length === 0) return;
+
+  let startRow = 0;
+  let currentValue = rows[0].cells[colIndex].textContent.trim();
+  let spanCount = 1;
+
+  for (let i = 1; i < rows.length; i++) {
+    const cellValue = rows[i].cells[colIndex].textContent.trim();
+
+    if (cellValue === currentValue) {
+      spanCount++;
+      // Скрываем текущую ячейку
+      rows[i].cells[colIndex].style.display = 'none';
+    } else {
+      // Объединяем предыдущие ячейки
+      if (spanCount > 1) {
+        rows[startRow].cells[colIndex].rowSpan = spanCount;
+      }
+      // Начинаем новый диапазон
+      startRow = i;
+      currentValue = cellValue;
+      spanCount = 1;
+    }
+  }
+
+  // Объединяем оставшиеся ячейки в конце
+  if (spanCount > 1) {
+    rows[startRow].cells[colIndex].rowSpan = spanCount;
+  }
+}
+
+// Функция для добавления обработчиков расхождений
+function addDiscrepancyHandlers(tableBody) {
+  const rows = tableBody.querySelectorAll('tr');
+
+  rows.forEach(row => {
+    const issuedCell = row.querySelector('.countIssued');
+    const acceptedCell = row.querySelector('.countAccepted');
+    const discrepancyCell = row.querySelector('.discrepancy');
+
+    if (issuedCell && acceptedCell && discrepancyCell) {
+      const updateDiscrepancy = () => {
+        const issued = parseInt(issuedCell.textContent) || 0;
+        const accepted = parseInt(acceptedCell.textContent) || 0;
+        discrepancyCell.textContent = issued - accepted;
+      };
+
+      issuedCell.addEventListener('input', updateDiscrepancy);
+      acceptedCell.addEventListener('input', updateDiscrepancy);
+    }
+  });
+}
+
 // Загрузка данных задания
 fetch('../html/task.json')
   .then(response => {
@@ -296,6 +355,9 @@ function renderTable(data) {
   const tableBody = document.querySelector("#taskTable tbody");
   tableBody.innerHTML = "";
 
+  // Создаем массив строк перед добавлением в DOM
+  const rows = [];
+
   data.forEach((task, index) => {
     const uniqueKey = `${task.numberSP}-${task.numberOperation}`;
     const originalIssued = originalIssuedMap.get(uniqueKey) || 0;
@@ -327,22 +389,19 @@ function renderTable(data) {
           oninput="validatePercentageInput(this)"
       >${task.percentage ?? ""}</td>
     `;
-    tableBody.appendChild(row);
-
-    // Добавление обработчиков для расчета расхождений
-    const issuedCell = row.querySelector('.countIssued');
-    const acceptedCell = row.querySelector('.countAccepted');
-    const discrepancyCell = row.querySelector('.discrepancy');
-
-    const updateDiscrepancy = () => {
-      const issued = parseInt(issuedCell.textContent) || 0;
-      const accepted = parseInt(acceptedCell.textContent) || 0;
-      discrepancyCell.textContent = issued - accepted;
-    };
-
-    issuedCell.addEventListener('input', updateDiscrepancy);
-    acceptedCell.addEventListener('input', updateDiscrepancy);
+    rows.push(row);
   });
+
+  // Добавляем строки в таблицу
+  rows.forEach(row => tableBody.appendChild(row));
+
+  // Объединяем ячейки в указанных столбцах
+  MERGE_COLUMNS.forEach(colIndex => {
+    mergeCellsInColumn(tableBody, colIndex);
+  });
+
+  // Добавляем обработчики событий для расчета расхождений
+  addDiscrepancyHandlers(tableBody);
 }
 
 // Валидация числового ввода
@@ -407,170 +466,170 @@ function addAddRowButton() {
 
     // Обработчик клика по кнопке добавления строки
     addRowBtn.addEventListener('click', () => {
-  if (!isEditing) {
-    alert('Сначала войдите в режим редактирования');
-    return;
-  }
+      if (!isEditing) {
+        alert('Сначала войдите в режим редактирования');
+        return;
+      }
 
-  const tableBody = document.querySelector('#taskTable tbody');
-  const newRow = document.createElement('tr');
+      const tableBody = document.querySelector('#taskTable tbody');
+      const newRow = document.createElement('tr');
 
-  // Создание новой строки с пометкой data-is-new
-  newRow.setAttribute('data-is-new', 'true');
-  newRow.innerHTML = `
-    <td class="number numberSP" contenteditable="true"></td>
-    <td contenteditable="true"></td>
-    <td contenteditable="true"></td>
-    <td class="number" contenteditable="true"></td>
-    <td contenteditable="true"></td>
-    <td class="number countIssued" contenteditable="true">0</td>
-    <td class="number countAccepted" contenteditable="true">0</td>
-    <td class="number discrepancy">0</td>
-    <td class="number percentage" contenteditable="true">0</td>
-  `;
-  tableBody.appendChild(newRow);
+      // Создание новой строки с пометкой data-is-new
+      newRow.setAttribute('data-is-new', 'true');
+      newRow.innerHTML = `
+        <td class="number numberSP" contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td class="number" contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td class="number countIssued" contenteditable="true">0</td>
+        <td class="number countAccepted" contenteditable="true">0</td>
+        <td class="number discrepancy">0</td>
+        <td class="number percentage" contenteditable="true">0</td>
+      `;
+      tableBody.appendChild(newRow);
 
-  // Добавление обработчиков ввода для ограничения значений
-  const numberSPCell = newRow.querySelector('.numberSP');
-  const numberOperationCell = newRow.querySelector('td:nth-child(4)');
-  const countIssuedCell = newRow.querySelector('.countIssued');
-  const countAcceptedCell = newRow.querySelector('.countAccepted');
-  const percentageCell = newRow.querySelector('.percentage');
+      // Добавление обработчиков ввода для ограничения значений
+      const numberSPCell = newRow.querySelector('.numberSP');
+      const numberOperationCell = newRow.querySelector('td:nth-child(4)');
+      const countIssuedCell = newRow.querySelector('.countIssued');
+      const countAcceptedCell = newRow.querySelector('.countAccepted');
+      const percentageCell = newRow.querySelector('.percentage');
 
-  // Ограничение для Номера СП (только цифры, один / и один пробел, после пробела только 4 цифры)
-  numberSPCell.addEventListener('input', function() {
-    // Сохраняем позицию курсора
-    const cursorPosition = window.getSelection().getRangeAt(0).startOffset;
+      // Ограничение для Номера СП (только цифры, один / и один пробел, после пробела только 4 цифры)
+      numberSPCell.addEventListener('input', function() {
+        // Сохраняем позицию курсора
+        const cursorPosition = window.getSelection().getRangeAt(0).startOffset;
 
-    let value = this.textContent;
+        let value = this.textContent;
 
-    // Удаляем все символы, кроме цифр, / и пробелов
-    value = value.replace(/[^\d/ ]/g, '');
+        // Удаляем все символы, кроме цифр, / и пробелов
+        value = value.replace(/[^\d/ ]/g, '');
 
-    // Ограничиваем количество слэшей (максимум 1)
-    const slashCount = (value.match(/\//g) || []).length;
-    if (slashCount > 1) {
-      // Оставляем только первый слэш
-      const parts = value.split('/');
-      value = parts[0] + '/' + parts.slice(1).join('').replace(/\//g, '');
-    }
-
-    // Разделяем на части до и после слэша
-    let [beforeSlash, afterSlash] = value.split('/');
-
-    // Обрабатываем часть до слэша (максимум 4 цифры)
-    if (beforeSlash) {
-      beforeSlash = beforeSlash.replace(/\D/g, '').substring(0, 4);
-    }
-
-    // Обрабатываем часть после слэша
-    if (afterSlash) {
-      // Удаляем все пробелы для последующей обработки
-      afterSlash = afterSlash.replace(/\s/g, '');
-
-      // Форматируем часть после слэша: 3 цифры + пробел + 4 цифры
-      if (afterSlash.length > 0) {
-        const firstPart = afterSlash.substring(0, 3);
-        let formattedAfterSlash = firstPart;
-
-        // Если введено 3 цифры, добавляем пробел
-        if (firstPart.length === 3) {
-          formattedAfterSlash += ' ';
-
-          // Добавляем оставшиеся цифры (максимум 4)
-          const secondPart = afterSlash.substring(3, 7);
-          formattedAfterSlash += secondPart;
+        // Ограничиваем количество слэшей (максимум 1)
+        const slashCount = (value.match(/\//g) || []).length;
+        if (slashCount > 1) {
+          // Оставляем только первый слэш
+          const parts = value.split('/');
+          value = parts[0] + '/' + parts.slice(1).join('').replace(/\//g, '');
         }
 
-        afterSlash = formattedAfterSlash;
-      }
-    }
+        // Разделяем на части до и после слэша
+        let [beforeSlash, afterSlash] = value.split('/');
 
-    // Собираем итоговое значение
-    this.textContent = afterSlash !== undefined
-      ? `${beforeSlash}/${afterSlash}`
-      : beforeSlash;
+        // Обрабатываем часть до слэша (максимум 4 цифры)
+        if (beforeSlash) {
+          beforeSlash = beforeSlash.replace(/\D/g, '').substring(0, 4);
+        }
 
-    // Восстанавливаем позицию курсора
-    if (window.getSelection().rangeCount > 0) {
-      const range = window.getSelection().getRangeAt(0);
-      range.setStart(this.childNodes[0], Math.min(cursorPosition, this.textContent.length));
-      range.collapse(true);
-    }
-  });
+        // Обрабатываем часть после слэша
+        if (afterSlash) {
+          // Удаляем все пробелы для последующей обработки
+          afterSlash = afterSlash.replace(/\s/g, '');
 
-  // Обработчик keydown для пробела оставляем без изменений
-  numberSPCell.addEventListener('keydown', function(e) {
-    if (e.key === ' ') {
-      const selection = window.getSelection();
-      if (selection.rangeCount === 0) return;
+          // Форматируем часть после слэша: 3 цифры + пробел + 4 цифры
+          if (afterSlash.length > 0) {
+            const firstPart = afterSlash.substring(0, 3);
+            let formattedAfterSlash = firstPart;
 
-      const range = selection.getRangeAt(0);
-      const cursorPosition = range.startOffset;
-      let value = this.textContent;
+            // Если введено 3 цифры, добавляем пробел
+            if (firstPart.length === 3) {
+              formattedAfterSlash += ' ';
 
-      // Проверяем, можно ли вставить пробел (должен быть слэш и цифры после него)
-      if (value.includes('/')) {
-        const afterSlash = value.split('/')[1] || '';
-        if (afterSlash.trim().length > 0 && !afterSlash.includes(' ')) {
-          e.preventDefault();
+              // Добавляем оставшиеся цифры (максимум 4)
+              const secondPart = afterSlash.substring(3, 7);
+              formattedAfterSlash += secondPart;
+            }
 
-          // Вставляем пробел в текущую позицию курсора
-          const newValue = value.substring(0, cursorPosition) + ' ' + value.substring(cursorPosition);
-          this.textContent = newValue;
+            afterSlash = formattedAfterSlash;
+          }
+        }
 
-          // Перемещаем курсор после пробела
-          range.setStart(this.childNodes[0], cursorPosition + 1);
+        // Собираем итоговое значение
+        this.textContent = afterSlash !== undefined
+          ? `${beforeSlash}/${afterSlash}`
+          : beforeSlash;
+
+        // Восстанавливаем позицию курсора
+        if (window.getSelection().rangeCount > 0) {
+          const range = window.getSelection().getRangeAt(0);
+          range.setStart(this.childNodes[0], Math.min(cursorPosition, this.textContent.length));
           range.collapse(true);
         }
-      }
-    }
-  });
+      });
 
-  // Ограничение для Номера операции (только цифры)
-  numberOperationCell.addEventListener('input', function() {
-    this.textContent = this.textContent.replace(/[^\d]/g, '');
-  });
+      // Обработчик keydown для пробела
+      numberSPCell.addEventListener('keydown', function(e) {
+        if (e.key === ' ') {
+          const selection = window.getSelection();
+          if (selection.rangeCount === 0) return;
 
-  // Ограничение для Кол-во выдано (только цифры)
-  countIssuedCell.addEventListener('input', function() {
-    this.textContent = this.textContent.replace(/[^\d]/g, '');
-  });
+          const range = selection.getRangeAt(0);
+          const cursorPosition = range.startOffset;
+          let value = this.textContent;
 
-  // Ограничение для Кол-во принято (только цифры)
-  countAcceptedCell.addEventListener('input', function() {
-    this.textContent = this.textContent.replace(/[^\d]/g, '');
-  });
+          // Проверяем, можно ли вставить пробел (должен быть слэш и цифры после него)
+          if (value.includes('/')) {
+            const afterSlash = value.split('/')[1] || '';
+            if (afterSlash.trim().length > 0 && !afterSlash.includes(' ')) {
+              e.preventDefault();
 
-  // Ограничение для Процента выполнения (только цифры 0-100)
-  percentageCell.addEventListener('input', function() {
-    let value = this.textContent.replace(/[^\d]/g, '');
-    if (value) {
-      const num = parseInt(value);
-      if (num > 100) {
-        value = '100';
-      }
-    }
-    this.textContent = value;
-  });
+              // Вставляем пробел в текущую позицию курсора
+              const newValue = value.substring(0, cursorPosition) + ' ' + value.substring(cursorPosition);
+              this.textContent = newValue;
 
-  // Добавление обработчиков для расчета расхождений
-  const issuedCell = newRow.querySelector('.countIssued');
-  const acceptedCell = newRow.querySelector('.countAccepted');
-  const discrepancyCell = newRow.querySelector('.discrepancy');
+              // Перемещаем курсор после пробела
+              range.setStart(this.childNodes[0], cursorPosition + 1);
+              range.collapse(true);
+            }
+          }
+        }
+      });
 
-  const updateDiscrepancy = () => {
-    const issued = parseInt(issuedCell.textContent) || 0;
-    const accepted = parseInt(acceptedCell.textContent) || 0;
-    discrepancyCell.textContent = issued - accepted;
-  };
+      // Ограничение для Номера операции (только цифры)
+      numberOperationCell.addEventListener('input', function() {
+        this.textContent = this.textContent.replace(/[^\d]/g, '');
+      });
 
-  issuedCell.addEventListener('input', updateDiscrepancy);
-  acceptedCell.addEventListener('input', updateDiscrepancy);
+      // Ограничение для Кол-во выдано (только цифры)
+      countIssuedCell.addEventListener('input', function() {
+        this.textContent = this.textContent.replace(/[^\d]/g, '');
+      });
 
-  // Установка фокуса на первую ячейку
-  newRow.querySelector('td').focus();
-});
+      // Ограничение для Кол-во принято (только цифры)
+      countAcceptedCell.addEventListener('input', function() {
+        this.textContent = this.textContent.replace(/[^\d]/g, '');
+      });
+
+      // Ограничение для Процента выполнения (только цифры 0-100)
+      percentageCell.addEventListener('input', function() {
+        let value = this.textContent.replace(/[^\d]/g, '');
+        if (value) {
+          const num = parseInt(value);
+          if (num > 100) {
+            value = '100';
+          }
+        }
+        this.textContent = value;
+      });
+
+      // Добавление обработчиков для расчета расхождений
+      const issuedCell = newRow.querySelector('.countIssued');
+      const acceptedCell = newRow.querySelector('.countAccepted');
+      const discrepancyCell = newRow.querySelector('.discrepancy');
+
+      const updateDiscrepancy = () => {
+        const issued = parseInt(issuedCell.textContent) || 0;
+        const accepted = parseInt(acceptedCell.textContent) || 0;
+        discrepancyCell.textContent = issued - accepted;
+      };
+
+      issuedCell.addEventListener('input', updateDiscrepancy);
+      acceptedCell.addEventListener('input', updateDiscrepancy);
+
+      // Установка фокуса на первую ячейку
+      newRow.querySelector('td').focus();
+    });
 
     buttonContainer.appendChild(addRowBtn);
   }
@@ -608,8 +667,8 @@ editButton.addEventListener("click", () => {
       errors.push("• Дата выдачи обязательна");
     }
 
-    // Проверка данных в таблице
-    document.querySelectorAll("tr").forEach((row, rowIndex) => {
+    // Проверка данных в таблице (игнорируем скрытые строки)
+    document.querySelectorAll("tr:not([style*='display: none'])").forEach((row, rowIndex) => {
       const cells = row.querySelectorAll("td");
       if (cells.length < 9) return;
 
@@ -672,6 +731,12 @@ editButton.addEventListener("click", () => {
     // Выход из режима редактирования
     editButton.textContent = "Изменить данные";
     saveToLocalStorage();
+
+    // Перерисовываем таблицу для обновления объединенных ячеек
+    const savedData = localStorage.getItem(`taskData_${numberTask}`);
+    if (savedData) {
+      renderTable(JSON.parse(savedData));
+    }
   }
 
   isEditing = !isEditing;
@@ -688,8 +753,8 @@ function saveToLocalStorage() {
     dateAccept: document.getElementById("headerDateAccept").textContent.trim()
   };
 
-  // Сбор данных из таблицы
-  const rows = document.querySelectorAll("#taskTable tbody tr");
+  // Сбор данных из таблицы (игнорируем скрытые строки)
+  const rows = document.querySelectorAll("#taskTable tbody tr:not([style*='display: none'])");
   let hasEmptyCells = false;
   let emptyRowsCount = 0;
 
